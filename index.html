@@ -180,6 +180,8 @@ h1 button:focus-visible{outline:3px solid #ffd27a}
 .tile.new .op{display:grid;place-items:center;min-height:100%;padding:30px;text-align:center;font:400 24px "Permanent Marker",cursive;color:var(--paper);background:repeating-linear-gradient(45deg,#2a1d14 0 12px,#30221a 12px 24px)}
 .tile.new .op b{display:block;font-size:56px;line-height:1;color:var(--red)}
 .empty{color:#c9ad88;grid-column:1/-1}
+.tile .op[data-a=imp]:hover .nm{color:#ffd27a}
+#lib.imp .note{display:none}
 .note{color:#c9ad88;font-size:14px;margin-top:22px}
 @media(max-width:600px){header{flex-wrap:wrap;overflow-x:visible}header>*{order:3}header>h1{order:0}header>.menu{order:1;margin-left:auto}header>.doc{order:2;flex:1 1 100%!important}h1,.menu,.doc{flex-shrink:1}#zoom{right:12px;bottom:12px;left:12px;justify-content:space-between;gap:4px}#zoom .lb,#zoom .zsep,#zl{display:none}#zoom{padding:4px}#zoom button{min-width:40px;padding:0 6px}h1{font-size:22px}.doc{flex:1}#bname{width:100%}.sep{display:none}button,label.btn{padding:0 10px;font-size:14px}}
 @media(prefers-reduced-motion:reduce){.it{transition:none}}
@@ -200,6 +202,7 @@ h1 button:focus-visible{outline:3px solid #ffd27a}
    <hr>
    <button data-a="download">Save to computer</button>
    <button data-a="open">Open from computer…</button>
+   <button data-a="import">Import a board…</button>
    <hr>
    <button data-a="clear">Clear board</button>
    <button data-a="delete">Delete board</button>
@@ -511,7 +514,9 @@ window.addEventListener('pointermove',e=>{
   const id=drag.i.id;
   if(drag.mod&&!sel.has(id)){sel.add(id);paintSel()}
   else if(!drag.mod&&!sel.has(id))clearSel();
-  const ids=sel.has(id)?[...sel]:[id];
+  let ids=sel.has(id)?[...sel]:[id];
+  drag.pins=[];
+  if(!e.altKey){const c=contents(ids);ids=ids.concat(c.ids);drag.pins=c.pins}
   drag.grp=ids.map(k=>{const el=board.querySelector(`.it[data-id="${k}"]`),i=S.items.find(x=>x.id===k);return el&&i?{el,i,x0:i.x,y0:i.y}:null}).filter(Boolean);
   drag.grp.forEach(g=>g.el.classList.add('drag'));
   if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();
@@ -520,6 +525,7 @@ window.addEventListener('pointermove',e=>{
  const w=toWorld(e.clientX,e.clientY);
  const dx=Math.round(w.x-drag.ox)-drag.x0,dy=Math.round(w.y-drag.oy)-drag.y0;
  drag.grp.forEach(g=>{g.i.x=g.x0+dx;g.i.y=g.y0+dy;g.el.style.left=g.i.x+'px';g.el.style.top=g.i.y+'px'});
+ drag.pins.forEach(q=>{q.p.cx=q.cx0+dx;q.p.cy=q.cy0+dy;if(q.el){q.el.style.left=q.p.cx+'px';q.el.style.top=q.p.cy+'px'}});
  drawYarn();
 });
 const up=e=>{
@@ -682,11 +688,28 @@ function copySel(){
  return clip;
 }
 function overBoard(p){if(!p)return false;const r=wrap.getBoundingClientRect();return p.x>r.left&&p.x<r.right&&p.y>r.top&&p.y<r.bottom}
+/* pieces and pins sitting inside the given regions */
+function inPoly(pts,x,y){let ins=false;for(let a=0,b=pts.length-1;a<pts.length;b=a++){const [xa,ya]=pts[a],[xb,yb]=pts[b];if((ya>y)!==(yb>y)&&x<(xb-xa)*(y-ya)/(yb-ya)+xa)ins=!ins}return ins}
+function contents(ids){
+ const have=new Set(ids),out=[],pins=[];
+ const zones=ids.map(k=>S.items.find(i=>i.id===k)).filter(i=>i&&i.k==='zone').map(z=>{const el=board.querySelector(`.it[data-id="${z.id}"]`);return el?{z,X:z.x,Y:z.y,W:el.offsetWidth,H:el.offsetHeight}:null}).filter(Boolean);
+ if(!zones.length)return{ids:[],pins:[]};
+ const inside=(x,y,full)=>zones.some(q=>{if(x<q.X||y<q.Y||x>q.X+q.W||y>q.Y+q.H)return false;return !q.z.pts||full||inPoly(q.z.pts,(x-q.X)/q.W,(y-q.Y)/q.H)});
+ board.querySelectorAll('.it').forEach(el=>{
+  const k=+el.dataset.id;if(have.has(k))return;
+  const L=el.offsetLeft,T=el.offsetTop,W=el.offsetWidth,H=el.offsetHeight;
+  if(el.classList.contains('zone')){if(inside(L,T,1)&&inside(L+W,T+H,1)){out.push(k);have.add(k)}}
+  else if(inside(L+W/2,T+H/2)){out.push(k);have.add(k)}
+ });
+ places().forEach(p=>{if(inside(p.cx,p.cy))pins.push({p,cx0:p.cx,cy0:p.cy,el:board.querySelector(`.mark[data-pid="${p.id}"]`)})});
+ return{ids:out,pins};
+}
 function pasteClip(c,at){
- if(!c||!c.items||!c.items.length)return;
+ if(!c||!c.items||(!c.items.length&&!(c.places&&c.places.length)))return;
  snap();
  let a=1e9,b=1e9,d=-1e9,f=-1e9;
  c.items.forEach(i=>{const s=SZ[i.k]||[180,120],w=i.W||s[0],hh=i.H||s[1];a=Math.min(a,i.x);b=Math.min(b,i.y);d=Math.max(d,i.x+w);f=Math.max(f,i.y+hh)});
+ (c.places||[]).forEach(p=>{a=Math.min(a,p.cx);b=Math.min(b,p.cy);d=Math.max(d,p.cx);f=Math.max(f,p.cy)});
  let dx,dy;
  if(at){dx=Math.round(at.x-(a+d)/2);dy=Math.round(at.y-(b+f)/2)}else{pasteN++;dx=dy=30*pasteN}
  const map={};let next=nid();
@@ -694,8 +717,10 @@ function pasteClip(c,at){
  const items=c.items.map(i=>({...JSON.parse(JSON.stringify(i)),id:map[i.id],x:i.x+dx,y:i.y+dy}));
  S.items.push(...items);
  (c.links||[]).forEach(l=>{if(map[l[0]]&&map[l[1]])S.links.push([map[l[0]],map[l[1]]])});
+ let np=0;
+ if(c.places&&c.places.length){const P=places();c.places.forEach(p=>{P.push({...p,id:uid(),cx:Math.round(p.cx+dx),cy:Math.round(p.cy+dy)});np++});drawMarks()}
  sel=new Set(items.map(i=>i.id));render();
- flash('Pasted '+items.length+(items.length===1?' piece':' pieces'));
+ flash((c.msg||'Pasted')+' '+items.length+(items.length===1?' piece':' pieces')+(np?' and '+np+(np===1?' pin':' pins'):'')+(c.from?' from “'+c.from+'”':''));
 }
 const pasteAt=()=>overBoard(lastPtr)?toWorld(lastPtr.x,lastPtr.y):null;
 window.addEventListener('copy',e=>{
@@ -787,17 +812,35 @@ function download(b){
   flash('Saved “'+b.name+'” to your downloads');
  }catch(e){flash('This page isn’t allowed to download files here.')}
 }
-$('openFile').onchange=e=>{
- const f=e.target.files[0];e.target.value='';if(!f)return;
- f.text().then(t=>{
+function readBoardFile(f){
+ return f.text().then(t=>{
   const d=JSON.parse(t);
   if(!d||!Array.isArray(d.items))throw 0;
   d.items.forEach(i=>{if(i&&i.k==='eq')i.k='card';if(i&&i.pts&&!(Array.isArray(i.pts)&&i.pts.every(p=>Array.isArray(p)&&p.length===2&&isFinite(p[0])&&isFinite(p[1]))))delete i.pts});d.items=d.items.filter(i=>i&&typeof i.id==='number'&&['card','sticky','clip','photo','zone','eq'].includes(i.k));
   d.links=(d.links||[]).filter(l=>Array.isArray(l)&&l.length===2);
   d.places=(d.places||[]).filter(p=>p&&isFinite(p.cx)&&isFinite(p.cy)&&p.z>0).map(p=>({id:uid(),name:String(p.name||'Place'),cx:+p.cx,cy:+p.cy,z:Math.max(.1,Math.min(3,+p.z))}));
-  return newBoard(d.name||f.name.replace(/(\.redstring)?\.json$/i,''),d);
- }).catch(()=>flash('That file isn’t a Red String board.'));
+  d.name=d.name||f.name.replace(/(\.redstring)?\.json$/i,'');
+  return d;
+ });
+}
+$('openFile').onchange=e=>{
+ const f=e.target.files[0];e.target.value='';if(!f)return;
+ const imp=importMode;
+ readBoardFile(f).then(d=>imp?importInto(d):newBoard(d.name,d)).catch(()=>flash('That file isn’t a Red String board.'));
 };
+function importInto(src){
+ closeLib();
+ const c=JSON.parse(JSON.stringify({items:src.items||[],links:src.links||[],places:src.places||[]}));
+ if(!c.items.length&&!c.places.length){flash('“'+src.name+'” is empty, so there was nothing to import.');return}
+ c.msg='Imported';c.from=src.name;
+ const bb=list=>{let a=1e9,b=1e9,d=-1e9,f=-1e9;list.forEach(i=>{const s=SZ[i.k]||[180,120],w=i.W||s[0],hh=i.H||s[1];a=Math.min(a,i.x);b=Math.min(b,i.y);d=Math.max(d,i.x+w);f=Math.max(f,i.y+hh)});return{a,b,d,f}};
+ const r=wrap.getBoundingClientRect();
+ if(S.items.length&&c.items.length){
+  const o=bb(S.items),g=bb(c.items);
+  pasteClip(c,{x:o.d+160+(g.d-g.a)/2,y:o.b+(g.f-g.b)/2});
+  fit();
+ }else pasteClip(c,toWorld(r.left+wrap.clientWidth/2,r.top+wrap.clientHeight/2));
+}
 const fileBtn=$('fileBtn'),fileMenu=$('fileMenu');
 function closeMenu(){fileMenu.hidden=true;fileBtn.setAttribute('aria-expanded','false')}
 function placeFile(){const r=fileBtn.getBoundingClientRect();fileMenu.style.top=(r.bottom+6)+'px';fileMenu.style.left=Math.max(8,Math.min(r.left,innerWidth-fileMenu.offsetWidth-8))+'px'}
@@ -808,6 +851,7 @@ document.addEventListener('pointerdown',e=>{if(!e.target.closest('.menu'))closeM
 const act={
  new:()=>newBoard('Untitled board'),
  browse:()=>openLib(),
+ import:()=>openLib(true),
  copy:()=>{flush();newBoard('Copy of '+cur.name,copyOf(cur))},
  rename:()=>ask('Rename board','Rename',v=>{setName(v);save();renderLib()},cur.name),
  download:()=>download(cur),
@@ -839,17 +883,28 @@ function renderLib(){
  if(lib.hidden)return;
  const term=q.value.trim().toLowerCase();
  const list=[...boards].sort((x,y)=>y.updated-x.updated).filter(b=>!term||(b.name||'').toLowerCase().includes(term)||(b.items||[]).some(i=>((i.t||'')+' '+(i.h||'')).toLowerCase().includes(term)));
+ const L=importMode?list.filter(b=>b!==cur):list;
+ if(importMode){grid.innerHTML=L.map(b=>`<div class="tile" data-id="${b.id}"><button class="op" data-a="imp">${thumb(b)}<span class="nm">${esc(b.name)}</span><span class="mt">${(b.items||[]).length} pieces · click to import</span></button></div>`).join('')+(L.length?'':`<p class="empty">${term?'No boards match “'+esc(q.value)+'”.':'You don’t have any other boards yet. You can import a saved board file with “Import from computer”.'}</p>`);return}
  grid.innerHTML=(term?'':'<div class="tile new"><button class="op" data-a="new"><span><b>+</b>New board</span></button></div>')+
   list.map(b=>`<div class="tile${b===cur?' cur':''}" data-id="${b.id}"><button class="op" data-a="go">${thumb(b)}<span class="nm">${esc(b.name)}</span><span class="mt">${(b.items||[]).length} pieces · edited ${ago(b.updated)}${b===cur?' · open now':''}</span></button><div class="acts"><button data-a="ren">Rename</button><button data-a="dup">Copy</button><button data-a="dl">Download</button><button data-a="del">Delete</button></div></div>`).join('')+
   (list.length?'':`<p class="empty">${term?'No boards match “'+esc(q.value)+'”.':'No boards yet.'}</p>`);
 }
-function openLib(){if(cur){cur.items=S.items;cur.links=S.links}flush();lib.hidden=false;q.value='';renderLib();setTimeout(()=>q.focus(),0)}
-function closeLib(){lib.hidden=true}
+let importMode=false;
+function openLib(imp){
+ importMode=imp===true;
+ if(cur){cur.items=S.items;cur.links=S.links}flush();
+ lib.classList.toggle('imp',importMode);
+ lib.querySelector('h2').textContent=importMode?'Import into “'+cur.name+'”':'Your boards';
+ $('libOpen').textContent=importMode?'Import from computer':'Open from computer';
+ lib.hidden=false;q.value='';renderLib();setTimeout(()=>q.focus(),0);
+}
+function closeLib(){lib.hidden=true;importMode=false}
 grid.onclick=e=>{
  const btn=e.target.closest('button');if(!btn)return;
  if(btn.dataset.a==='new')return newBoard('Untitled board');
  const b=boards.find(x=>x.id===btn.closest('.tile').dataset.id);if(!b)return;
- ({go:()=>{closeLib();if(b!==cur)openBoard(b)},
+ ({imp:()=>importInto(b),
+   go:()=>{closeLib();if(b!==cur)openBoard(b)},
    ren:()=>ask('Rename board','Rename',v=>{b.name=(v||'').trim()||'Untitled board';if(b===cur)setName(b.name);DB.put(b);renderLib()},b.name),
    dup:async()=>{const n={id:uid(),name:'Copy of '+b.name,created:Date.now(),updated:Date.now(),...copyOf(b),view:b.view||null};boards.push(n);await DB.put(n).catch(()=>flash('Couldn’t save the copy: storage full.'));renderLib()},
    dl:()=>download(b),
@@ -859,7 +914,7 @@ grid.onclick=e=>{
 q.oninput=renderLib;
 $('libClose').onclick=closeLib;
 $('libOpen').onclick=()=>$('openFile').click();
-$('browseBtn').onclick=openLib;$('logo').onclick=openLib;
+$('browseBtn').onclick=()=>openLib();$('logo').onclick=()=>openLib();
 lib.addEventListener('pointerdown',e=>{if(e.target===lib)closeLib()});
 window.addEventListener('hashchange',()=>{const m=location.hash.match(/^#b-(\w+)/);const b=m&&boards.find(x=>x.id===m[1]);if(b&&b!==cur){closeLib();openBoard(b)}});
 window.addEventListener('pagehide',()=>{if(saveT)flush()});
