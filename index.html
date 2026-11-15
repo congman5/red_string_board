@@ -62,7 +62,6 @@ svg#yarn path:hover{stroke:#ff3a3a;stroke-width:4}
 #dlg{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;place-items:center;z-index:20}
 #dlg div{background:var(--paper);color:#222;padding:22px;border-radius:8px;max-width:340px;font-size:16px}
 #dlg p{margin:0 0 16px}
-.sample{position:absolute;left:1180px;top:880px;white-space:nowrap;font:500 16px "Caveat",cursive;color:#3b2410;opacity:.75;z-index:1}
 @media(max-width:600px){h1{font-size:22px;width:100%}button,label.btn{padding:0 10px;font-size:14px}}
 @media(prefers-reduced-motion:reduce){.it{transition:none}}
 </style>
@@ -79,7 +78,7 @@ svg#yarn path:hover{stroke:#ff3a3a;stroke-width:4}
  <button id="undo">Undo</button>
  <button id="clear">Clear board</button>
 </header>
-<div id="wrap"><div id="board"><svg id="yarn"></svg><div class="sample">sample case file, clear it whenever</div></div>
+<div id="wrap"><div id="board"><svg id="yarn"></svg></div>
  <div id="toast" role="status"></div><div id="dropmsg">Drop to pin it up</div>
  <div id="zoom"><button id="zOut" aria-label="Zoom out">−</button><span id="zl">100%</span><button id="zIn" aria-label="Zoom in">+</button><button id="zHome" aria-label="Home">⌂ Home</button><button id="zFit">Fit all</button></div>
 </div>
@@ -311,8 +310,7 @@ document.getElementById('undo').onclick=doUndo;
 const dlg=document.getElementById('dlg');
 document.getElementById('clear').onclick=()=>dlg.style.display='grid';
 document.getElementById('no').onclick=()=>dlg.style.display='none';
-document.getElementById('yes').onclick=()=>{snap();S={items:[],links:[]};const s=board.querySelector('.sample');s&&s.remove();render();dlg.style.display='none'};
-if(!S.items.some(i=>i.id===1&&i.k==='clip'&&i.h==='Office fridge raided again')){const s=board.querySelector('.sample');s&&s.remove()}
+document.getElementById('yes').onclick=()=>{snap();S={items:[],links:[]};render();dlg.style.display='none'};
 render();
 if(V&&typeof V.z==='number')applyView();else{V={x:0,y:0,z:1};fit()}
 document.fonts&&document.fonts.ready.then(drawYarn);
