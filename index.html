@@ -106,6 +106,31 @@ h1 button:focus-visible{outline:3px solid #ffd27a}
 .menu{position:relative}
 .pop{position:absolute;left:0;top:calc(100% + 6px);z-index:30;background:#2a1d14;border:2px solid #6b4a33;border-radius:8px;padding:6px;min-width:230px;box-shadow:0 10px 24px rgba(0,0,0,.5);display:flex;flex-direction:column}
 .pop[hidden]{display:none}
+.pop.up{top:auto;bottom:calc(100% + 10px);left:auto;right:-6px;min-width:270px;max-height:min(60vh,460px);overflow:auto}
+.pl{display:flex;align-items:center;gap:2px}
+.pl .go{flex:1;gap:10px}
+.pl .go kbd{font:12px system-ui,sans-serif;color:#c9ad88;border:1px solid #6b4a33;border-radius:4px;padding:1px 6px;min-width:22px;text-align:center}
+.pl .go span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pl .sm{width:auto!important;min-width:36px;min-height:36px!important;padding:0 8px;justify-content:center!important;color:#c9ad88;font-size:13px}
+.pl .sm:hover{color:#fff}
+.plh{font-size:13px;color:#c9ad88;padding:6px 10px 2px}
+.plsave{color:#ffd27a!important}
+.mark{position:absolute;z-index:8;transform:translate(-50%,-100%) scale(var(--ms,1));transform-origin:50% 100%;display:flex;flex-direction:column;align-items:center;cursor:grab;touch-action:none;user-select:none}
+.mark.drag{cursor:grabbing}
+.mk-lb{display:flex;align-items:center;gap:6px;background:#1d140e;color:#ffe8b0;font:600 14px/1 system-ui,sans-serif;padding:6px 10px;border-radius:14px;white-space:nowrap;box-shadow:0 3px 8px rgba(0,0,0,.45);margin-bottom:3px;max-width:220px}
+.mk-lb kbd{font:700 11px system-ui,sans-serif;background:#f2b705;color:#1d140e;border-radius:4px;padding:2px 5px}
+.mk-lb span{overflow:hidden;text-overflow:ellipsis}
+.mk-pin{width:30px;height:40px;display:block;filter:drop-shadow(1px 4px 3px rgba(0,0,0,.5))}
+.mk-x{position:absolute;right:-12px;top:-12px;width:24px;height:24px;min-height:0;padding:0;border-radius:50%;border:0;background:#222;color:#fff;font:15px sans-serif;display:none;justify-content:center}
+.mark:hover .mk-x{display:flex}
+@media(hover:none){.mk-x{display:flex}}
+.mark.new{animation:drop .45s cubic-bezier(.3,1.6,.5,1)}
+@keyframes drop{0%{transform:translate(-50%,-160%) scale(var(--ms,1));opacity:0}100%{transform:translate(-50%,-100%) scale(var(--ms,1));opacity:1}}
+@media(prefers-reduced-motion:reduce){.mark.new{animation:none}}
+#flag{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;border:3px solid #ffd27a;pointer-events:none;z-index:7;opacity:0}
+#flag.on{animation:ping .7s ease-out}
+@keyframes ping{0%{opacity:1;transform:scale(.4)}100%{opacity:0;transform:scale(1.8)}}
+@media(prefers-reduced-motion:reduce){#flag.on{animation:none}}
 .pop button{border:0;background:none;justify-content:flex-start;width:100%;min-height:40px}
 .pop button:hover{background:#4a3324}
 .pop hr{border:0;border-top:1px solid #4a3324;margin:4px 6px;width:auto}
@@ -161,8 +186,8 @@ h1 button:focus-visible{outline:3px solid #ffd27a}
  <label class="btn">+ Photo<input id="aPhoto" type="file" accept="image/*" hidden></label>
 </header>
 <div id="wrap"><div id="board"><svg id="yarn"></svg></div>
- <div id="toast" role="status"></div><div id="dropmsg">Drop to pin it up</div>
- <div id="zoom"><button id="undo" title="Undo (Ctrl/Cmd+Z)" aria-label="Undo">↶<span class="lb"> Undo</span></button><span class="zsep"></span><button id="zOut" aria-label="Zoom out">−</button><span id="zl">100%</span><button id="zIn" aria-label="Zoom in">+</button><button id="zHome" aria-label="Home">⌂<span class="lb"> Home</span></button><button id="zFit">Fit all</button></div>
+ <div id="toast" role="status"></div><div id="flag"></div><div id="dropmsg">Drop to pin it up</div>
+ <div id="zoom"><button id="undo" title="Undo (Ctrl/Cmd+Z)" aria-label="Undo">↶<span class="lb"> Undo</span></button><span class="zsep"></span><button id="zOut" aria-label="Zoom out">−</button><span id="zl">100%</span><button id="zIn" aria-label="Zoom in">+</button><button id="zHome" aria-label="Home">⌂<span class="lb"> Home</span></button><button id="zFit" aria-label="Fit all">Fit<span class="lb"> all</span></button><span class="zsep"></span><div class="menu up"><button id="plBtn" aria-haspopup="true" aria-expanded="false" title="Map pins: drop, drag, jump (keys 1–9)">⚑<span class="lb"> Pins</span></button><div id="plMenu" class="pop up" hidden></div></div></div>
 </div>
 <div id="dlg"><form id="dlgF"><p id="dlgT"></p><input id="dlgIn" maxlength="60" hidden><div class="row"><button type="submit" id="yes">OK</button><button type="button" id="no">Cancel</button></div></form></div>
 <input id="openFile" type="file" accept=".json,application/json" hidden>
@@ -232,6 +257,7 @@ function applyView(){
  wrap.style.backgroundSize=sz;
  wrap.style.backgroundPosition=`${V.x}px ${V.y}px`;
  zl.textContent=Math.round(V.z*100)+'%';
+ board.style.setProperty('--ms',1/V.z);
  saveV();
 }
 function zoomAt(z,cx,cy){
@@ -313,7 +339,7 @@ yarn.addEventListener('click',e=>{
 });
 
 /* ---- pointers: drag items, pan, pinch ---- */
-let drag=null,pan=null,pinDrag=null,rs=null;
+let drag=null,pan=null,pinDrag=null,rs=null,mkDrag=null;
 function clearPick(){pick=null;board.querySelectorAll('.pick,.target').forEach(p=>p.classList.remove('pick','target'))}
 function link(a,b){
  if(a===b||S.links.some(l=>(l[0]===a&&l[1]===b)||(l[0]===b&&l[1]===a)))return;
@@ -342,6 +368,10 @@ wrap.addEventListener('pointerdown',e=>{
   const [p,q]=[...pts.values()],r=wrap.getBoundingClientRect();
   pinch={d:Math.hypot(p.x-q.x,p.y-q.y),z:V.z,mx:(p.x+q.x)/2-r.left,my:(p.y+q.y)/2-r.top,vx:V.x,vy:V.y};return;
  }
+ const mk=T.closest('.mark');
+ if(mk){e.preventDefault();clearPick();const P=places(),p=P.find(q=>q.id===mk.dataset.pid);if(!p)return;
+  if(T.closest('.mk-x')){P.splice(P.indexOf(p),1);drawMarks();save();return}
+  const w=toWorld(e.clientX,e.clientY);mkDrag={mk,p,ox:w.x-p.cx,oy:w.y-p.cy,sx:e.clientX,sy:e.clientY,moved:false};return}
  const it=T.closest('.it');
  if(!it){
   if(T.closest('path'))return;
@@ -380,6 +410,12 @@ window.addEventListener('pointermove',e=>{
   const wx=(pinch.mx-pinch.vx)/pinch.z,wy=(pinch.my-pinch.vy)/pinch.z;
   V.z=z;V.x=mx-wx*z;V.y=my-wy*z;applyView();return;
  }
+ if(mkDrag){
+  if(!mkDrag.moved&&Math.hypot(e.clientX-mkDrag.sx,e.clientY-mkDrag.sy)<5)return;
+  mkDrag.moved=true;mkDrag.mk.classList.add('drag');e.preventDefault();
+  const w=toWorld(e.clientX,e.clientY);mkDrag.p.cx=Math.round(w.x-mkDrag.ox);mkDrag.p.cy=Math.round(w.y-mkDrag.oy);
+  mkDrag.mk.style.left=mkDrag.p.cx+'px';mkDrag.mk.style.top=mkDrag.p.cy+'px';return;
+ }
  if(rs){
   e.preventDefault();const w=toWorld(e.clientX,e.clientY);
   rs.i.W=Math.round(Math.max(90,Math.min(rs.i.k==='zone'?6000:1600,rs.W0+w.x-rs.x0)));
@@ -411,6 +447,7 @@ window.addEventListener('pointermove',e=>{
 const up=e=>{
  pts.delete(e.pointerId);if(pts.size<2)pinch=null;
  if(pan){pan=null;wrap.classList.remove('pan')}
+ if(mkDrag){const md=mkDrag;mkDrag=null;md.mk.classList.remove('drag');if(md.moved)save();else flyTo(md.p);return}
  if(rs){rs.it.classList.remove('sizing');rs=null;drawYarn();save();return}
  if(pinDrag){
   const pd=pinDrag;pinDrag=null;tmpLine(null);board.querySelectorAll('.target').forEach(p=>p.classList.remove('target'));
@@ -545,11 +582,12 @@ bname.addEventListener('input',()=>{if(!cur)return;cur.name=bname.value;document
 bname.addEventListener('blur',()=>{if(cur&&!bname.value.trim()){setName('');save()}});
 bname.addEventListener('keydown',e=>{if(e.key==='Enter')bname.blur()});
 async function openBoard(b){
+ if(typeof closePl==='function')closePl();
  if(cur&&saveT)await flush();
  loading=true;cur=b;
  S={items:b.items||[],links:b.links||[]};hist=[];pick=null;
  setName(b.name);setSt('Saved');
- render();
+ render();drawMarks();
  if(b.view&&typeof b.view.z==='number'){V=Object.assign({},b.view);applyView()}else fit();
  loading=false;
  try{localStorage.setItem(LAST,b.id)}catch(e){}
@@ -558,13 +596,13 @@ async function openBoard(b){
 }
 async function newBoard(name,data){
  const now=Date.now();
- const b={id:uid(),name:name||'Untitled board',created:now,updated:now,items:(data&&data.items)||[],links:(data&&data.links)||[],view:null};
+ const b={id:uid(),name:name||'Untitled board',created:now,updated:now,items:(data&&data.items)||[],links:(data&&data.links)||[],places:(data&&data.places)||[],view:null};
  boards.push(b);
  try{await DB.put(b)}catch(e){flash('Couldn’t save: this browser’s storage is full.')}
  await openBoard(b);closeLib();
  return b;
 }
-function copyOf(b){return JSON.parse(JSON.stringify({items:b.items||[],links:b.links||[]}))}
+function copyOf(b){return JSON.parse(JSON.stringify({items:b.items||[],links:b.links||[],places:(b.places||[]).map(p=>({...p,id:uid()}))}))}
 async function delBoard(b){
  await DB.del(b.id).catch(()=>{});
  boards=boards.filter(x=>x!==b);
@@ -573,7 +611,7 @@ async function delBoard(b){
 }
 function download(b){
  if(b===cur){b.items=S.items;b.links=S.links}
- const data=JSON.stringify({app:'red-string-board',v:1,name:b.name,items:b.items||[],links:b.links||[]});
+ const data=JSON.stringify({app:'red-string-board',v:1,name:b.name,items:b.items||[],links:b.links||[],places:b.places||[]});
  try{
   const u=URL.createObjectURL(new Blob([data],{type:'application/json'})),a=document.createElement('a');
   a.href=u;a.download=(b.name||'board').replace(/[\\/:*?"<>|]+/g,'').trim().slice(0,60)+'.redstring.json';
@@ -588,6 +626,7 @@ $('openFile').onchange=e=>{
   if(!d||!Array.isArray(d.items))throw 0;
   d.items.forEach(i=>{if(i&&i.k==='eq')i.k='card'});d.items=d.items.filter(i=>i&&typeof i.id==='number'&&['card','sticky','clip','photo','zone','eq'].includes(i.k));
   d.links=(d.links||[]).filter(l=>Array.isArray(l)&&l.length===2);
+  d.places=(d.places||[]).filter(p=>p&&isFinite(p.cx)&&isFinite(p.cy)&&p.z>0).map(p=>({id:uid(),name:String(p.name||'Place'),cx:+p.cx,cy:+p.cy,z:Math.max(.1,Math.min(3,+p.z))}));
   return newBoard(d.name||f.name.replace(/(\.redstring)?\.json$/i,''),d);
  }).catch(()=>flash('That file isn’t a Red String board.'));
 };
@@ -654,6 +693,71 @@ lib.addEventListener('pointerdown',e=>{if(e.target===lib)closeLib()});
 window.addEventListener('hashchange',()=>{const m=location.hash.match(/^#b-(\w+)/);const b=m&&boards.find(x=>x.id===m[1]);if(b&&b!==cur){closeLib();openBoard(b)}});
 window.addEventListener('pagehide',()=>{if(saveT)flush()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&saveT)flush()});
+
+/* ---- saved places ---- */
+const plBtn=$('plBtn'),plMenu=$('plMenu');
+const places=()=>(cur&&(cur.places||(cur.places=[])))||[];
+function closePl(){plMenu.hidden=true;plBtn.setAttribute('aria-expanded','false')}
+function centerNow(){return{cx:(wrap.clientWidth/2-V.x)/V.z,cy:(wrap.clientHeight/2-V.y)/V.z,z:V.z}}
+let flyRaf=0;
+function flyTo(p){
+ const W=wrap.clientWidth,H=wrap.clientHeight;
+ const to={z:p.z,x:W/2-p.cx*p.z,y:H/2-p.cy*p.z};
+ cancelAnimationFrame(flyRaf);
+ const ping=()=>{const f=$('flag');f.classList.remove('on');void f.offsetWidth;f.classList.add('on')};
+ if(matchMedia('(prefers-reduced-motion: reduce)').matches){V=to;applyView();ping();return}
+ const a=centerNow(),t0=performance.now(),D=650;
+ const step=t=>{
+  let k=Math.min(1,(t-t0)/D);k=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;
+  const z=Math.exp(Math.log(a.z)+(Math.log(p.z)-Math.log(a.z))*k);
+  const cx=a.cx+(p.cx-a.cx)*k,cy=a.cy+(p.cy-a.cy)*k;
+  V={z,x:W/2-cx*z,y:H/2-cy*z};applyView();
+  if(k<1)flyRaf=requestAnimationFrame(step);else ping();
+ };
+ flyRaf=requestAnimationFrame(step);
+}
+const PINSVG='<svg class="mk-pin" viewBox="0 0 30 40"><path d="M15 39C15 39 2 23.5 2 14.5a13 13 0 0 1 26 0C28 23.5 15 39 15 39z" fill="#f2b705" stroke="#5a3d00" stroke-width="2"/><circle cx="15" cy="14.5" r="5" fill="#5a3d00"/><circle cx="11" cy="9.5" r="2.4" fill="#fff" opacity=".6"/></svg>';
+function drawMarks(newId){
+ board.querySelectorAll('.mark').forEach(m=>m.remove());
+ places().forEach((p,n)=>{
+  const m=document.createElement('div');m.className='mark'+(p.id===newId?' new':'');m.dataset.pid=p.id;
+  m.style.left=p.cx+'px';m.style.top=p.cy+'px';m.title='Click to jump here · drag to move';
+  m.innerHTML=`<span class="mk-lb">${n<9?`<kbd>${n+1}</kbd>`:''}<span>${esc(p.name)}</span></span>${PINSVG}<button class="mk-x" aria-label="Remove pin ${esc(p.name)}">×</button>`;
+  board.appendChild(m);
+ });
+}
+function renderPl(){
+ const P=places();
+ plMenu.innerHTML=`<div class="plh">${P.length?'Pins on this board':'No pins yet'}</div>`+
+  P.map((p,n)=>`<div class="pl" data-n="${n}"><button class="go" data-a="go">${n<9?`<kbd>${n+1}</kbd>`:'<kbd>·</kbd>'}<span>${esc(p.name)}</span></button><button class="sm" data-a="ren" title="Rename" aria-label="Rename ${esc(p.name)}">✎</button><button class="sm" data-a="del" title="Remove" aria-label="Remove ${esc(p.name)}">×</button></div>`).join('')+
+  `<hr><button class="plsave" data-a="save">+ Drop a pin here</button>`;
+}
+function dropPin(at){
+ const P=places();
+ ask('Name this pin','Drop pin',v=>{
+  const c=centerNow(),p={id:uid(),name:(v||'').trim()||'Pin '+(P.length+1),cx:Math.round(at?at.x:c.cx),cy:Math.round(at?at.y:c.cy),z:c.z};
+  P.push(p);drawMarks(p.id);save();
+  flash('Pin dropped. Drag it anywhere, click it to jump back'+(P.length<=9?', or press '+P.length:'')+'.');
+ },'Pin '+(P.length+1));
+}
+plBtn.onclick=e=>{e.stopPropagation();closeMenu();if(plMenu.hidden){renderPl();plMenu.hidden=false;plBtn.setAttribute('aria-expanded','true')}else closePl()};
+plMenu.onclick=e=>{
+ const b=e.target.closest('button');if(!b)return;
+ const row=b.closest('.pl'),P=places(),n=row?+row.dataset.n:-1,p=P[n];
+ ({save:()=>{closePl();dropPin()},
+   go:()=>{closePl();flyTo(p)},
+   ren:()=>{closePl();ask('Rename pin','Rename',v=>{p.name=(v||'').trim()||p.name;drawMarks();save()},p.name)},
+   del:()=>{P.splice(n,1);drawMarks();save();renderPl()}
+ })[b.dataset.a]();
+};
+document.addEventListener('pointerdown',e=>{if(!e.target.closest('.menu.up'))closePl()});
+window.addEventListener('keydown',e=>{
+ if(e.ctrlKey||e.metaKey||e.altKey)return;
+ if(e.key==='Escape')closePl();
+ if(e.target.closest&&(e.target.closest('.t')||e.target.closest('input,textarea')))return;
+ if(!$('lib').hidden||$('dlg').style.display==='grid')return;
+ if(/^[1-9]$/.test(e.key)){const p=places()[+e.key-1];if(p){e.preventDefault();flyTo(p)}}
+});
 
 /* ---- start ---- */
 (async()=>{
