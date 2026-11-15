@@ -83,6 +83,13 @@ svg#yarn path.tmp{stroke-dasharray:6 5;pointer-events:none}
 @media(hover:none){.tz{display:flex}}
 .zone .tz{left:auto;right:52px;top:15px}
 .zone .x{right:-12px;top:-12px}
+.t mjx-container{display:inline-block;vertical-align:middle;max-width:100%;position:relative}
+mjx-assistive-mml{position:absolute!important;top:0;left:0;clip:rect(1px,1px,1px,1px);padding:1px 0 0!important;border:0!important;display:block!important;width:auto!important;overflow:hidden!important;user-select:none}
+.t mjx-container svg{max-width:100%;height:auto}
+.t mjx-container[display="true"]{display:block;margin:.35em 0;text-align:center}
+.t.raw{font-family:ui-monospace,Menlo,Consolas,monospace!important;font-size:max(13px,.7em)}
+.eq{width:250px;padding:26px 16px 16px;background:#22332a;background-image:radial-gradient(ellipse at 30% 20%,rgba(255,255,255,.07),transparent 60%);color:#f1f0e6;font:500 calc(24px*var(--fs,1))/1.25 "Caveat",cursive;text-align:center;border:7px solid #8a5a33;border-radius:3px}
+.eq .t.raw{text-align:left}
 .sticky{width:150px;min-height:130px;padding:22px 12px 12px;background:#ffe96b;color:#3a2f00;font:400 calc(18px*var(--fs,1))/1.15 "Permanent Marker",cursive}
 #dlg{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;place-items:center;z-index:40;padding:16px}
 #dlgF{background:var(--paper);color:#222;padding:22px;border-radius:8px;width:min(380px,100%);font-size:16px}
@@ -128,6 +135,8 @@ h1 button:focus-visible{outline:3px solid #ffd27a}
 @media(max-width:600px){header{flex-wrap:wrap;overflow-x:visible}header>*{order:3}header>h1{order:0}header>.menu{order:1;margin-left:auto}header>.doc{order:2;flex:1 1 100%!important}h1,.menu,.doc{flex-shrink:1}#zoom{right:12px;bottom:12px;left:12px;justify-content:space-between;gap:4px}#zoom .lb,#zoom .zsep{display:none}#zoom button{min-width:44px;padding:0 8px}h1{font-size:22px}.doc{flex:1}#bname{width:100%}.sep{display:none}button,label.btn{padding:0 10px;font-size:14px}}
 @media(prefers-reduced-motion:reduce){.it{transition:none}}
 </style>
+<script>window.MathJax={svg:{fontCache:'none'},options:{enableMenu:false},startup:{typeset:false,ready(){MathJax.startup.defaultReady();MathJax.startup.promise.then(()=>{window.__mjOK=true;window.__mj&&window.__mj()})}}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg-full.js"></script>
 </head>
 <body>
 <header>
@@ -150,6 +159,7 @@ h1 button:focus-visible{outline:3px solid #ffd27a}
  <button id="aCard">+ Card</button>
  <button id="aSticky">+ Sticky</button>
  <button id="aClip">+ Clipping</button>
+ <button id="aEq" title="Equation on a chalkboard. Use $…$ or $$…$$ in any text">+ Math</button>
  <button id="aZone">+ Region</button>
  <label class="btn">+ Photo<input id="aPhoto" type="file" accept="image/*" hidden></label>
 </header>
@@ -243,11 +253,29 @@ function fit(){
  V={z,x:W/2-(a+c)/2*z,y:H/2-(b+d)/2*z};applyView();
 }
 
+/* ---- math: $…$ inline, $$…$$ display (LaTeX via MathJax) ---- */
+const MATHRE=/\\\$|\$\$([\s\S]+?)\$\$|\$(?=[^\s$])([^$\n]*?[^\s$\\])\$(?!\d)|\$([^\s$\d])\$/g;
+const hasMath=s=>/\$/.test(s||'');
+function fmt(s){
+ s=s||'';
+ if(!hasMath(s)||!window.__mjOK)return esc(s);
+ let out='',last=0;MATHRE.lastIndex=0;let m;
+ while((m=MATHRE.exec(s))){
+  out+=esc(s.slice(last,m.index));last=MATHRE.lastIndex;
+  if(m[0]==='\\$'){out+='$';continue}
+  const tex=m[1]!=null?m[1]:(m[2]!=null?m[2]:m[3]),disp=m[1]!=null;
+  try{out+=MathJax.tex2svg(tex,{display:disp}).outerHTML}catch(err){out+=esc(m[0])}
+ }
+ return out+esc(s.slice(last));
+}
+const itemOf=el=>S.items.find(i=>i.id===+el.closest('.it').dataset.id);
+function paint(el){const i=itemOf(el);if(i)el.innerHTML=fmt(i[el.dataset.f])}
+window.__mj=()=>{board.querySelectorAll('.t').forEach(el=>{if(el!==document.activeElement&&hasMath(itemOf(el)&&itemOf(el)[el.dataset.f]))paint(el)});drawYarn()};
 function inner(i){
- if(i.k==='zone')return `<div class="t" data-f="t" contenteditable>${esc(i.t)}</div><button class="cc" title="Change color" aria-label="Change color"></button>`;
- if(i.k==='clip')return `<b class="t" data-f="h" contenteditable>${esc(i.h)}</b><div class="t" data-f="t" contenteditable>${esc(i.t)}</div>`;
- if(i.k==='photo')return `<div class="img" style="${i.img?`background-image:url(${i.img})`:''}">${i.img?'':'no photo yet'}</div><div class="t" data-f="t" contenteditable>${esc(i.t)}</div>`;
- return `<div class="t" data-f="t" contenteditable>${esc(i.t)}</div>`;
+ if(i.k==='zone')return `<div class="t" data-f="t" contenteditable>${fmt(i.t)}</div><button class="cc" title="Change color" aria-label="Change color"></button>`;
+ if(i.k==='clip')return `<b class="t" data-f="h" contenteditable>${fmt(i.h)}</b><div class="t" data-f="t" contenteditable>${fmt(i.t)}</div>`;
+ if(i.k==='photo')return `<div class="img" style="${i.img?`background-image:url(${i.img})`:''}">${i.img?'':'no photo yet'}</div><div class="t" data-f="t" contenteditable>${fmt(i.t)}</div>`;
+ return `<div class="t" data-f="t" contenteditable>${fmt(i.t)}</div>`;
 }
 const ZC=['#ffd60a','#ff4d4d','#3d9bff','#3cc45a','#ff6bd6','#a970ff'];
 function render(){
@@ -411,9 +439,22 @@ wrap.addEventListener('wheel',e=>{
 board.addEventListener('input',e=>{
  const t=e.target.closest('.t');if(!t)return;
  const i=S.items.find(i=>i.id===+t.closest('.it').dataset.id);
- i[t.dataset.f]=t.innerText;drawYarn();save();
+ i[t.dataset.f]=t.innerText;t.classList.toggle('raw',hasMath(i[t.dataset.f]));drawYarn();save();
 });
-board.addEventListener('focusin',e=>{if(e.target.closest('.t'))snap()});
+board.addEventListener('focusin',e=>{
+ const t=e.target.closest('.t');if(!t)return;snap();
+ const i=itemOf(t),raw=(i&&i[t.dataset.f])||'';
+ if(hasMath(raw)&&t.querySelector('mjx-container')){
+  t.textContent=raw;t.classList.add('raw');
+  const r=document.createRange();r.selectNodeContents(t);r.collapse(false);const sel=getSelection();sel.removeAllRanges();sel.addRange(r);
+  drawYarn();
+ }else if(hasMath(raw))t.classList.add('raw');
+});
+board.addEventListener('focusout',e=>{
+ const t=e.target.closest('.t');if(!t)return;
+ t.classList.remove('raw');
+ const i=itemOf(t);if(i&&hasMath(i[t.dataset.f])){paint(t);drawYarn()}
+});
 
 const zc=f=>zoomAt(V.z*f,wrap.clientWidth/2,wrap.clientHeight/2);
 document.getElementById('zIn').onclick=()=>zc(1.25);
@@ -436,7 +477,7 @@ window.addEventListener('keydown',e=>{
 function add(k,extra){
  snap();
  const c=toWorld(wrap.getBoundingClientRect().left+wrap.clientWidth/2,wrap.getBoundingClientRect().top+wrap.clientHeight/2);
- const base={card:{t:'New lead…'},sticky:{t:'???'},clip:{h:'Breaking',t:'Details emerging.'},photo:{t:'Suspect',img:''},zone:{t:'Suspects',c:S.items.filter(i=>i.k==='zone').length%6,W:420,H:300}}[k];
+ const base={card:{t:'New lead…'},sticky:{t:'???'},clip:{h:'Breaking',t:'Details emerging.'},photo:{t:'Suspect',img:''},eq:{t:'$$P(\\text{Dave}) = \\frac{48\\ \\text{forks}}{3\\ \\text{lunches}}$$'},zone:{t:'Suspects',c:S.items.filter(i=>i.k==='zone').length%6,W:420,H:300}}[k];
  const j=()=>(Math.random()-.5)*160/V.z;
  const ox=k==='zone'?210:90,oy=k==='zone'?150:70;
  S.items.push(Object.assign({id:nid(),k,x:Math.round(c.x-ox+j()),y:Math.round(c.y-oy+j())},base,extra));render();
@@ -445,6 +486,7 @@ document.getElementById('aCard').onclick=()=>add('card');
 document.getElementById('aSticky').onclick=()=>add('sticky');
 document.getElementById('aClip').onclick=()=>add('clip');
 document.getElementById('aZone').onclick=()=>add('zone');
+document.getElementById('aEq').onclick=()=>add('eq');
 function shrink(f,cb){
  const img=new Image(),r=new FileReader();
  r.onload=()=>{img.onload=()=>{
@@ -547,7 +589,7 @@ $('openFile').onchange=e=>{
  f.text().then(t=>{
   const d=JSON.parse(t);
   if(!d||!Array.isArray(d.items))throw 0;
-  d.items=d.items.filter(i=>i&&typeof i.id==='number'&&['card','sticky','clip','photo','zone'].includes(i.k));
+  d.items=d.items.filter(i=>i&&typeof i.id==='number'&&['card','sticky','clip','photo','zone','eq'].includes(i.k));
   d.links=(d.links||[]).filter(l=>Array.isArray(l)&&l.length===2);
   return newBoard(d.name||f.name.replace(/(\.redstring)?\.json$/i,''),d);
  }).catch(()=>flash('That file isn’t a Red String board.'));
@@ -570,7 +612,7 @@ fileMenu.onclick=e=>{const b=e.target.closest('button');if(!b)return;closeMenu()
 
 /* ---- library / browse ---- */
 const lib=$('lib'),grid=$('grid'),q=$('q');
-const SZ={card:[190,120],clip:[220,130],photo:[170,190],sticky:[150,130],zone:[420,300]},FILL={card:'#fffdf6',clip:'#e9e1cc',photo:'#fafafa',sticky:'#ffe96b'};
+const SZ={card:[190,120],clip:[220,130],photo:[170,190],sticky:[150,130],zone:[420,300],eq:[250,130]},FILL={eq:'#22332a',card:'#fffdf6',clip:'#e9e1cc',photo:'#fafafa',sticky:'#ffe96b'};
 function thumb(b){
  const it=b.items||[];
  if(!it.length)return '<svg class="th" viewBox="0 0 220 150"><text x="110" y="80" text-anchor="middle" font-family="Caveat,cursive" font-size="22" fill="#5a3a1e">empty board</text></svg>';
