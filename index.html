@@ -57,6 +57,14 @@ header>*{flex-shrink:0}header button,header .btn,h1{white-space:nowrap}
 svg#yarn{position:absolute;left:0;top:0;width:1px;height:1px;pointer-events:none;z-index:3;overflow:visible}
 #zoom{position:absolute;right:22px;bottom:22px;z-index:9;display:flex;gap:6px;align-items:center;background:rgba(42,29,20,.92);padding:6px;border-radius:10px;box-shadow:0 4px 14px rgba(0,0,0,.4)}
 #zoom button{min-width:44px;justify-content:center;padding:0 10px}
+#plBtn{cursor:grab;touch-action:none;gap:4px}
+#plBtn .trayp{width:20px;height:24px;margin:-4px -2px -2px;filter:drop-shadow(1px 2px 1px rgba(0,0,0,.45));transition:transform .15s}
+#plBtn:hover .trayp{transform:translateY(-3px) rotate(-6deg)}
+#plBtn.empty .trayp{opacity:.35}
+#pinGhost{position:fixed;left:0;top:0;z-index:50;pointer-events:none;display:none}
+#pinGhost svg{position:absolute;filter:drop-shadow(6px 12px 4px rgba(0,0,0,.35))}
+#pinGhost .gsh{position:absolute;border-radius:50%;background:rgba(0,0,0,.25);filter:blur(2px)}
+body.pindrag,body.pindrag *{cursor:grabbing!important}
 #zoom .zsep{width:2px;height:28px;background:#4a3324;margin:0 2px}
 #zl{min-width:58px;text-align:center;color:var(--paper);font-size:15px;font-variant-numeric:tabular-nums}
 svg#yarn path{fill:none;stroke:var(--red);stroke-width:2.6;stroke-linecap:round;filter:drop-shadow(1px 3px 1.5px rgba(0,0,0,.45));pointer-events:stroke;cursor:pointer}
@@ -269,13 +277,14 @@ h1 button:focus-visible{outline:3px solid #ffd27a}
 <symbol id="ppb" viewBox="0 0 30 36"><path d="M15.4 27.4 L18.6 32.6" stroke="#8f969c" stroke-width="1.7" stroke-linecap="round"/><path d="M15.6 27.6 L18.2 31.8" stroke="#e3e7ea" stroke-width=".6" stroke-linecap="round"/><g transform="rotate(-14 15 28)"><ellipse cx="15" cy="25.6" rx="7" ry="2.6" fill="url(#ppbd)"/><path d="M10.6 12.4 C11.6 18 10.7 22 9.9 25.4 L20.1 25.4 C19.3 22 18.4 18 19.4 12.4 Z" fill="url(#ppbs)"/><path d="M4.6 9 V11.8 A10.4 4.3 0 0 0 25.4 11.8 V9 Z" fill="url(#ppbd)"/><ellipse cx="15" cy="9" rx="10.4" ry="4.3" fill="url(#ppbt)"/><ellipse cx="11" cy="7.7" rx="4.2" ry="1.4" fill="#fff" opacity=".6"/></g></symbol></defs></svg>
 <div id="wrap"><div id="board"><svg id="yarn"></svg></div>
  <div id="toast" role="status"></div><div id="empty" hidden><b>A fresh board.</b><span>Add a card, sticky or clipping from the top bar, drop photos anywhere, or press <kbd>?</kbd> for shortcuts.</span></div><div id="flag"></div><div id="marq"></div><svg id="drawsvg"><path/></svg><div id="drawbar"><span>Draw region:</span><button id="dBox" class="on" aria-pressed="true">▭ Box</button><button id="dFree" aria-pressed="false">✎ Freehand</button><button id="dCancel">Cancel</button></div><div id="selbar" role="status"><span id="selN"></span><button id="selCopy" title="Copy (Ctrl/Cmd+C)">Copy</button><button id="selDup" title="Duplicate (Ctrl/Cmd+D)">Duplicate</button><button id="selPaste" title="Paste (Ctrl/Cmd+V)" hidden>Paste</button><button id="selDel">Delete</button><button id="selClr">Done</button></div><div id="dropmsg">Drop to pin it up</div>
- <div id="zoom"><button id="undo" title="Undo (Ctrl/Cmd+Z)" aria-label="Undo">↶<span class="lb"> Undo</span></button><span class="zsep"></span><button id="zOut" aria-label="Zoom out">−</button><span id="zl">100%</span><button id="zIn" aria-label="Zoom in">+</button><button id="zHome" aria-label="Home">⌂<span class="lb"> Home</span></button><button id="zSel" title="Select mode: drag a box or tap pieces (or hold Shift)" aria-pressed="false">⬚<span class="lb"> Select</span></button><button id="zFit" aria-label="Fit all">Fit<span class="lb"> all</span></button><span class="zsep"></span><div class="menu up"><button id="plBtn" aria-haspopup="true" aria-expanded="false" title="Map pins: drop, drag, jump (keys 1–9)">⚑<span class="lb"> Pins</span></button><div id="plMenu" class="pop up" hidden></div></div></div>
+ <div id="zoom"><button id="undo" title="Undo (Ctrl/Cmd+Z)" aria-label="Undo">↶<span class="lb"> Undo</span></button><span class="zsep"></span><button id="zOut" aria-label="Zoom out">−</button><span id="zl">100%</span><button id="zIn" aria-label="Zoom in">+</button><button id="zHome" aria-label="Home">⌂<span class="lb"> Home</span></button><button id="zSel" title="Select mode: drag a box or tap pieces (or hold Shift)" aria-pressed="false">⬚<span class="lb"> Select</span></button><button id="zFit" aria-label="Fit all">Fit<span class="lb"> all</span></button><span class="zsep"></span><div class="menu up"><button id="plBtn" aria-haspopup="true" aria-expanded="false" title="Drag onto the board to drop a pin · click for the list (keys 1–9)"><svg class="trayp" viewBox="0 0 30 36" aria-hidden="true"><use href="#ppb"/></svg><span class="lb"> Pins</span></button><div id="plMenu" class="pop up" hidden></div></div></div>
 </div>
+<div id="pinGhost"><span class="gsh"></span><svg viewBox="0 0 30 36"><use href="#ppb"/></svg></div>
 <div id="ffMenu" hidden role="menu"></div>
 <div id="help" hidden><div class="hin" role="dialog" aria-label="Keyboard shortcuts"><h2>Shortcuts</h2><dl>
 <dt>Drag empty cork</dt><dd>Pan</dd><dt>Scroll · pinch</dt><dd>Zoom</dd><dt><kbd>+</kbd> <kbd>−</kbd> · <kbd>0</kbd> · <kbd>H</kbd></dt><dd>Zoom · fit all · home</dd>
 <dt>Drag a red pin</dt><dd>Run a string</dd><dt>Click a string</dt><dd>Cut it</dd>
-<dt><kbd>Shift</kbd>-drag</dt><dd>Select with a box</dd><dt><kbd>Shift</kbd>-click</dt><dd>Add to selection</dd>
+<dt><kbd>Shift</kbd>-drag · middle-drag</dt><dd>Select with a box</dd><dt>Middle-click a piece</dt><dd>Add or remove it from the selection</dd><dt><kbd>Shift</kbd>-click</dt><dd>Add to selection</dd>
 <dt><kbd>⌘/Ctrl</kbd> <kbd>C</kbd> <kbd>X</kbd> <kbd>V</kbd> <kbd>D</kbd></dt><dd>Copy · cut · paste · duplicate</dd>
 <dt><kbd>⌘/Ctrl</kbd> <kbd>A</kbd> · <kbd>Delete</kbd></dt><dd>Select all · delete selection</dd>
 <dt><kbd>⌘/Ctrl</kbd> <kbd>Z</kbd> · <kbd>S</kbd></dt><dd>Undo · save now</dd>
@@ -484,6 +493,8 @@ wrap.addEventListener('pointermove',e=>{
  if(it!==hovEl){hovEl&&hovEl.classList.remove('hov');hovEl=it;it&&it.classList.add('hov')}
 },{passive:true});
 wrap.addEventListener('pointerleave',()=>{hovEl&&hovEl.classList.remove('hov');hovEl=null});
+wrap.addEventListener('mousedown',e=>{if(e.button===1)e.preventDefault()});
+wrap.addEventListener('auxclick',e=>{if(e.button===1)e.preventDefault()});
 let cutBlock=false;const pts=new Map();let pinch=null;
 wrap.addEventListener('pointerdown',e=>{
  let T=e.target;cutBlock=false;
@@ -497,6 +508,11 @@ wrap.addEventListener('pointerdown',e=>{
   drag=null;pan=null;wrap.classList.remove('pan');
   const [p,q]=[...pts.values()],r=wrap.getBoundingClientRect();
   pinch={d:Math.hypot(p.x-q.x,p.y-q.y),z:V.z,mx:(p.x+q.x)/2-r.left,my:(p.y+q.y)/2-r.top,vx:V.x,vy:V.y};return;
+ }
+ if(e.button===1){
+  e.preventDefault();clearPick();if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();
+  const r=wrap.getBoundingClientRect(),it0=T.closest&&T.closest('.it');
+  marq={x0:e.clientX-r.left,y0:e.clientY-r.top,add:e.shiftKey||e.ctrlKey||e.metaKey,moved:false,item:it0?+it0.dataset.id:null};return;
  }
  if(drawMode){e.preventDefault();if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();const r=wrap.getBoundingClientRect();if(drawShape==='free'){free={pts:[[e.clientX-r.left,e.clientY-r.top]]};const s=$('drawsvg');s.style.display='block';s.firstChild.setAttribute('d','');return}marq={x0:e.clientX-r.left,y0:e.clientY-r.top,draw:true,moved:false};$('marq').classList.add('draw');return}
  const mk=T.closest('.mark');
@@ -643,7 +659,7 @@ const up=e=>{
    const t=board.querySelector(`.it[data-id="${id}"] .t`);if(t){t.focus();const s=getSelection(),g=document.createRange();g.selectNodeContents(t);s.removeAllRanges();s.addRange(g)}
    return;
   }
-  if(!mq.moved){if(!mq.add)clearSel();return}
+  if(!mq.moved){if(mq.item!=null){sel.has(mq.item)?sel.delete(mq.item):sel.add(mq.item);paintSel()}else if(!mq.add)clearSel();return}
   const r=wrap.getBoundingClientRect(),b=mq.box,L=r.left+b.l,Tp=r.top+b.t,R=L+b.w,B=Tp+b.h;
   if(!mq.add)sel.clear();
   board.querySelectorAll('.it').forEach(el=>{const q=el.getBoundingClientRect();if(q.left<R&&q.right>L&&q.top<B&&q.bottom>Tp){
@@ -1101,10 +1117,45 @@ function drawMarks(newId){
 }
 function renderPl(){
  const P=places();
- plMenu.innerHTML=`<div class="plh">${P.length?'Pins on this board':'No pins yet. A pin marks a spot you can jump back to.'}</div>`+
+ plMenu.innerHTML=`<div class="plh">${P.length?'Pins on this board':'No pins yet. Drag the blue pin from this button onto the board, or drop one here.'}</div>`+
   P.map((p,n)=>`<div class="pl" data-n="${n}"><button class="go" data-a="go">${n<9?`<kbd>${n+1}</kbd>`:'<kbd>·</kbd>'}<span>${esc(p.name)}</span></button><button class="sm" data-a="ren" title="Rename" aria-label="Rename ${esc(p.name)}">✎</button><button class="sm" data-a="del" title="Remove" aria-label="Remove ${esc(p.name)}">×</button></div>`).join('')+
   `<hr><button class="plsave" data-a="save">+ Drop a pin here</button>`;
 }
+/* drag a pin out of the bottom bar */
+let trayDrag=null,trayJust=false;
+const ghost=$('pinGhost');
+function placeGhost(x,y){
+ const s=Math.max(.6,Math.min(2.2,V.z)),w=30*s,hh=36*s,sv=ghost.querySelector('svg'),sh=ghost.querySelector('.gsh');
+ Object.assign(sv.style,{width:w+'px',height:hh+'px',left:(x-18.6*s-5*s)+'px',top:(y-32.6*s-16*s)+'px'});
+ Object.assign(sh.style,{width:16*s+'px',height:6*s+'px',left:(x+2*s)+'px',top:(y+2*s)+'px'});
+}
+plBtn.addEventListener('pointerdown',e=>{
+ if(e.button>0)return;
+ trayDrag={sx:e.clientX,sy:e.clientY,on:false,id:e.pointerId};
+});
+window.addEventListener('pointermove',e=>{
+ if(!trayDrag||e.pointerId!==trayDrag.id)return;
+ if(!trayDrag.on){if(Math.hypot(e.clientX-trayDrag.sx,e.clientY-trayDrag.sy)<6)return;trayDrag.on=true;closePl();closeMenu();ghost.style.display='block';document.body.classList.add('pindrag')}
+ e.preventDefault();placeGhost(e.clientX,e.clientY);
+});
+function endTray(e,cancel){
+ if(!trayDrag)return;const t=trayDrag;trayDrag=null;
+ if(!t.on)return;
+ trayJust=true;setTimeout(()=>trayJust=false,50);
+ ghost.style.display='none';document.body.classList.remove('pindrag');
+ if(cancel)return;
+ const r=wrap.getBoundingClientRect(),over=document.elementFromPoint(e.clientX,e.clientY);
+ const inBoard=e.clientX>r.left&&e.clientX<r.right&&e.clientY>r.top&&e.clientY<r.bottom&&!(over&&over.closest&&over.closest('#zoom,#selbar,#drawbar'));
+ if(!inBoard){flash('Drop the pin onto the cork to place it');return}
+ const w=toWorld(e.clientX,e.clientY);
+ const P=places(),p={id:uid(),name:'Pin '+(P.length+1),cx:Math.round(w.x),cy:Math.round(w.y),z:V.z};
+ P.push(p);drawMarks(p.id);save();
+ ask('Name this pin','Save',v=>{p.name=(v||'').trim()||p.name;drawMarks();save()},p.name);
+}
+window.addEventListener('pointerup',e=>endTray(e,false));
+window.addEventListener('pointercancel',e=>endTray(e,true));
+window.addEventListener('keydown',e=>{if(e.key==='Escape'&&trayDrag&&trayDrag.on){trayDrag.on=true;endTray(e,true)}});
+board.addEventListener('dblclick',e=>{const tg=e.target.closest('.mk-tagw');if(!tg)return;const m=tg.closest('.mark'),p=places().find(q=>q.id===m.dataset.pid);if(!p)return;ask('Rename pin','Rename',v=>{p.name=(v||'').trim()||p.name;drawMarks();save()},p.name)});
 function dropPin(at){
  const P=places();
  ask('Name this pin','Drop pin',v=>{
@@ -1113,7 +1164,7 @@ function dropPin(at){
   flash('Pin dropped. Drag it anywhere, click it to jump back'+(P.length<=9?', or press '+P.length:'')+'.');
  },'Pin '+(P.length+1));
 }
-plBtn.onclick=e=>{e.stopPropagation();closeMenu();if(plMenu.hidden){renderPl();plMenu.hidden=false;plBtn.setAttribute('aria-expanded','true')}else closePl()};
+plBtn.onclick=e=>{e.stopPropagation();if(trayJust)return;closeMenu();if(plMenu.hidden){renderPl();plMenu.hidden=false;plBtn.setAttribute('aria-expanded','true')}else closePl()};
 plMenu.onclick=e=>{
  const b=e.target.closest('button');if(!b)return;
  const row=b.closest('.pl'),P=places(),n=row?+row.dataset.n:-1,p=P[n];
