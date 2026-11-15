@@ -32,6 +32,17 @@ header>*{flex-shrink:0}header button,header .btn,h1{white-space:nowrap}
  background-size:400px 400px,360px 360px,180px 180px,240px 240px,300px 300px,640px 640px}
 #wrap.pan{cursor:grabbing}
 #wrap.drawing,#wrap.drawing .it,#wrap.drawing .t{cursor:crosshair!important}
+.zone.free{background:none;border:0;border-radius:0;pointer-events:none}
+.zone.free>*{pointer-events:auto}
+.zone.free .zsh{position:absolute;inset:0;width:100%;height:100%;overflow:visible;z-index:-1;pointer-events:none}
+.zone.free .zsh path{fill:color-mix(in srgb,var(--zc) 34%,transparent);stroke:color-mix(in srgb,var(--zc) 75%,transparent);stroke-width:3;stroke-linejoin:round;vector-effect:non-scaling-stroke;pointer-events:visiblePainted;cursor:move}
+.zone.free.sel{outline:none}.zone.free.sel .zsh path{stroke:#ffd27a;stroke-dasharray:8 6}
+#drawsvg{position:absolute;inset:0;width:100%;height:100%;z-index:9;pointer-events:none;display:none}
+#drawsvg path{fill:rgba(255,214,10,.25);stroke:#ffd60a;stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+#drawbar{position:absolute;left:50%;top:14px;transform:translateX(-50%);z-index:10;display:none;align-items:center;gap:6px;background:rgba(42,29,20,.95);color:var(--paper);padding:6px 6px 6px 14px;border-radius:10px;box-shadow:0 4px 14px rgba(0,0,0,.4);white-space:nowrap}
+#wrap.drawing #drawbar{display:flex}
+#drawbar button{min-height:36px}
+#drawbar button.on{background:#7a5a1e;border-color:#ffd27a}
 #marq.draw{border:3px solid #ffd60a;background:rgba(255,214,10,.25);border-radius:18px}
 #dropmsg{position:absolute;inset:0;z-index:10;display:none;place-items:center;pointer-events:none;background:rgba(195,18,27,.18);outline:4px dashed var(--red);outline-offset:-22px;font:400 clamp(26px,5vw,44px) "Permanent Marker",cursive;color:#fff;text-shadow:0 3px 8px rgba(0,0,0,.6)}
 #wrap.drop #dropmsg{display:grid}
@@ -201,7 +212,7 @@ h1 button:focus-visible{outline:3px solid #ffd27a}
  <label class="btn">+ Photo<input id="aPhoto" type="file" accept="image/*" hidden></label>
 </header>
 <div id="wrap"><div id="board"><svg id="yarn"></svg></div>
- <div id="toast" role="status"></div><div id="flag"></div><div id="marq"></div><div id="selbar" role="status"><span id="selN"></span><button id="selCopy" title="Copy (Ctrl/Cmd+C)">Copy</button><button id="selDup" title="Duplicate (Ctrl/Cmd+D)">Duplicate</button><button id="selPaste" title="Paste (Ctrl/Cmd+V)" hidden>Paste</button><button id="selDel">Delete</button><button id="selClr">Done</button></div><div id="dropmsg">Drop to pin it up</div>
+ <div id="toast" role="status"></div><div id="flag"></div><div id="marq"></div><svg id="drawsvg"><path/></svg><div id="drawbar"><span>Draw region:</span><button id="dBox" class="on" aria-pressed="true">▭ Box</button><button id="dFree" aria-pressed="false">✎ Freehand</button><button id="dCancel">Cancel</button></div><div id="selbar" role="status"><span id="selN"></span><button id="selCopy" title="Copy (Ctrl/Cmd+C)">Copy</button><button id="selDup" title="Duplicate (Ctrl/Cmd+D)">Duplicate</button><button id="selPaste" title="Paste (Ctrl/Cmd+V)" hidden>Paste</button><button id="selDel">Delete</button><button id="selClr">Done</button></div><div id="dropmsg">Drop to pin it up</div>
  <div id="zoom"><button id="undo" title="Undo (Ctrl/Cmd+Z)" aria-label="Undo">↶<span class="lb"> Undo</span></button><span class="zsep"></span><button id="zOut" aria-label="Zoom out">−</button><span id="zl">100%</span><button id="zIn" aria-label="Zoom in">+</button><button id="zHome" aria-label="Home">⌂<span class="lb"> Home</span></button><button id="zSel" title="Select mode: drag a box or tap pieces (or hold Shift)" aria-pressed="false">⬚<span class="lb"> Select</span></button><button id="zFit" aria-label="Fit all">Fit<span class="lb"> all</span></button><span class="zsep"></span><div class="menu up"><button id="plBtn" aria-haspopup="true" aria-expanded="false" title="Map pins: drop, drag, jump (keys 1–9)">⚑<span class="lb"> Pins</span></button><div id="plMenu" class="pop up" hidden></div></div></div>
 </div>
 <div id="dlg"><form id="dlgF"><p id="dlgT"></p><input id="dlgIn" maxlength="60" hidden><div class="row"><button type="submit" id="yes">OK</button><button type="button" id="no">Cancel</button></div></form></div>
@@ -315,6 +326,13 @@ function inner(i){
  if(i.k==='photo')return `<div class="img" style="${i.img?`background-image:url(${i.img})`:''}">${i.img?'':'no photo yet'}</div><div class="t" data-f="t" contenteditable>${fmt(i.t)}</div>`;
  return `<div class="t" data-f="t" contenteditable>${fmt(i.t)}</div>`;
 }
+function freePath(pts,sx,sy,ox=0,oy=0){
+ const P=pts.map(p=>[ox+p[0]*sx,oy+p[1]*sy]),n=P.length;if(n<3)return '';
+ const f=v=>Math.round(v*10)/10,mid=(a,b)=>[(a[0]+b[0])/2,(a[1]+b[1])/2];
+ let m=mid(P[n-1],P[0]),d='M'+f(m[0])+','+f(m[1]);
+ for(let k=0;k<n;k++){const c=P[k],nx=mid(c,P[(k+1)%n]);d+='Q'+f(c[0])+','+f(c[1])+' '+f(nx[0])+','+f(nx[1])}
+ return d+'Z';
+}
 const rot=i=>i.r!=null?i.r:((i.id*37)%9-4)*.8;
 let sel=new Set(),selMode=false,drawMode=false;
 function paintSel(){board.querySelectorAll('.it').forEach(el=>el.classList.toggle('sel',sel.has(+el.dataset.id)));const n=sel.size;const sb=document.getElementById('selbar');if(sb){sb.classList.toggle('on',n>0||(selMode&&!!clip));document.getElementById('selN').textContent=n+' selected';document.getElementById('selPaste').hidden=!clip;['selCopy','selDup','selDel'].forEach(k=>document.getElementById(k).hidden=!n)}}
@@ -329,12 +347,14 @@ function render(){
   d.style.left=i.x+'px';d.style.top=i.y+'px';
   if(i.s&&!i.W){i.W=Math.round((SZ[i.k]||[180])[0]*i.s)}delete i.s;
   const Z=i.k==='zone';
+  if(Z&&i.pts)d.classList.add('free');
   if(!Z)d.style.transform=`rotate(${rot(i)}deg)`;
   else d.style.setProperty('--zc',ZC[i.c||0]);
   if(i.fs&&i.fs!==1)d.style.setProperty('--fs',i.fs);
   if(i.W)d.style.width=i.W+'px';
   if(i.H&&i.k!=='photo')d.style[Z?'height':'minHeight']=i.H+'px';
   d.innerHTML=(Z?'':'<span class="pin"></span>')+`<button class="x" aria-label="Remove">×</button><span class="rs" title="Drag to resize (hold Shift to scale text too)"></span>${Z?'':'<span class="ro" title="Drag to rotate (hold Shift to snap)"></span>'}<span class="tz"><button data-d="-1" title="Smaller text" aria-label="Smaller text">A−</button><button data-d="1" title="Bigger text" aria-label="Bigger text">A+</button></span>`+inner(i);
+  if(Z&&i.pts)d.insertAdjacentHTML('afterbegin',`<svg class="zsh" viewBox="0 0 1000 1000" preserveAspectRatio="none"><path d="${freePath(i.pts,1000,1000)}"/></svg>`);
   board.appendChild(d);
   if(i.k==='photo'&&i.IH)d.querySelector('.img').style.height=i.IH+'px';
   if(sel.has(i.id))d.classList.add('sel');
@@ -360,7 +380,7 @@ yarn.addEventListener('click',e=>{
 });
 
 /* ---- pointers: drag items, pan, pinch ---- */
-let drag=null,pan=null,pinDrag=null,rs=null,mkDrag=null,ro=null,marq=null;
+let drag=null,pan=null,pinDrag=null,rs=null,mkDrag=null,ro=null,marq=null,free=null;
 function clearPick(){pick=null;board.querySelectorAll('.pick,.target').forEach(p=>p.classList.remove('pick','target'))}
 function link(a,b){
  if(a===b||S.links.some(l=>(l[0]===a&&l[1]===b)||(l[0]===b&&l[1]===a)))return;
@@ -382,14 +402,14 @@ wrap.addEventListener('pointerdown',e=>{
   const u=document.elementsFromPoint(e.clientX,e.clientY).find(el=>!el.closest('#yarn'));
   if(u&&u.closest('.it')&&(u.closest('.pin,.x,.rs,.ro,.tz')||pick!=null)){T=u;cutBlock=true}
  }
- if(T.closest('#zoom,#selbar'))return;
+ if(T.closest('#zoom,#selbar,#drawbar'))return;
  pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
  if(pts.size===2){
   drag=null;pan=null;wrap.classList.remove('pan');
   const [p,q]=[...pts.values()],r=wrap.getBoundingClientRect();
   pinch={d:Math.hypot(p.x-q.x,p.y-q.y),z:V.z,mx:(p.x+q.x)/2-r.left,my:(p.y+q.y)/2-r.top,vx:V.x,vy:V.y};return;
  }
- if(drawMode&&!T.closest('#selbar')){e.preventDefault();if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();const r=wrap.getBoundingClientRect();marq={x0:e.clientX-r.left,y0:e.clientY-r.top,draw:true,moved:false};$('marq').classList.add('draw');return}
+ if(drawMode){e.preventDefault();if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();const r=wrap.getBoundingClientRect();if(drawShape==='free'){free={pts:[[e.clientX-r.left,e.clientY-r.top]]};const s=$('drawsvg');s.style.display='block';s.firstChild.setAttribute('d','');return}marq={x0:e.clientX-r.left,y0:e.clientY-r.top,draw:true,moved:false};$('marq').classList.add('draw');return}
  const mk=T.closest('.mark');
  if(mk){e.preventDefault();clearPick();const P=places(),p=P.find(q=>q.id===mk.dataset.pid);if(!p)return;
   if(T.closest('.mk-x')){P.splice(P.indexOf(p),1);drawMarks();save();return}
@@ -468,6 +488,12 @@ window.addEventListener('pointermove',e=>{
   ro.grp.forEach(g=>{g.i.r=Math.round((((g.r0+d)%360+540)%360-180)*10)/10;g.el.style.transform=`rotate(${g.i.r}deg)`});
   return;
  }
+ if(free){
+  e.preventDefault();const r=wrap.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top,l=free.pts[free.pts.length-1];
+  if(Math.hypot(x-l[0],y-l[1])<3)return;
+  free.pts.push([x,y]);$('drawsvg').firstChild.setAttribute('d','M'+free.pts.map(p=>p.join(',')).join('L')+'Z');
+  return;
+ }
  if(marq){
   const r=wrap.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
   if(!marq.moved&&Math.hypot(x-marq.x0,y-marq.y0)<4)return;
@@ -500,6 +526,18 @@ const up=e=>{
  pts.delete(e.pointerId);if(pts.size<2)pinch=null;
  if(pan){if(!pan.moved)clearSel();pan=null;wrap.classList.remove('pan')}
  if(ro){ro.it.classList.remove('turning');ro=null;save();return}
+ if(free){
+  const fr=free;free=null;$('drawsvg').style.display='none';
+  const r=wrap.getBoundingClientRect();
+  const xs=fr.pts.map(p=>p[0]),ys=fr.pts.map(p=>p[1]),l=Math.min(...xs),t=Math.min(...ys),w=Math.max(...xs)-l,hh=Math.max(...ys)-t;
+  if(fr.pts.length<4||w<16||hh<16){flash('Draw a bigger shape to make a region');return}
+  setDraw(false);snap();
+  const a=toWorld(r.left+l,r.top+t),W=Math.round(w/V.z),H=Math.round(hh/V.z);
+  const pts=fr.pts.map(p=>[Math.round((p[0]-l)/w*1000)/1000,Math.round((p[1]-t)/hh*1000)/1000]);
+  const id=nid();S.items.push({id,k:'zone',t:'Suspects',c:S.items.filter(i=>i.k==='zone').length%6,x:Math.round(a.x),y:Math.round(a.y),W:Math.max(40,W),H:Math.max(40,H),pts});render();
+  const tt=board.querySelector(`.it[data-id="${id}"] .t`);if(tt){tt.focus();const s=getSelection(),g=document.createRange();g.selectNodeContents(tt);s.removeAllRanges();s.addRange(g)}
+  return;
+ }
  if(marq){
   const mq=marq;marq=null;$('marq').style.display='none';$('marq').classList.remove('draw');
   if(mq.draw){
@@ -595,7 +633,10 @@ document.getElementById('aCard').onclick=()=>add('card');
 document.getElementById('aSticky').onclick=()=>add('sticky');
 document.getElementById('aClip').onclick=()=>add('clip');
 const aZ=document.getElementById('aZone');
-function setDraw(on){drawMode=on;aZ.classList.toggle('on',on);aZ.setAttribute('aria-pressed',String(on));wrap.classList.toggle('drawing',on);if(on){clearPick();flash('Drag on the board to draw a region · Esc to cancel')}}
+let drawShape='box';try{drawShape=localStorage.getItem('redstring-drawshape')||'box'}catch(e){}
+function setShape(s){drawShape=s;try{localStorage.setItem('redstring-drawshape',s)}catch(e){};[['dBox','box'],['dFree','free']].forEach(([id,v])=>{const b=$(id);b.classList.toggle('on',s===v);b.setAttribute('aria-pressed',String(s===v))})}
+function setDraw(on){drawMode=on;aZ.classList.toggle('on',on);aZ.setAttribute('aria-pressed',String(on));wrap.classList.toggle('drawing',on);if(on){clearPick();setShape(drawShape)}}
+$('dBox').onclick=()=>setShape('box');$('dFree').onclick=()=>setShape('free');$('dCancel').onclick=()=>setDraw(false);
 aZ.onclick=()=>setDraw(!drawMode);
 function shrink(f,cb){
  const img=new Image(),r=new FileReader();
@@ -751,7 +792,7 @@ $('openFile').onchange=e=>{
  f.text().then(t=>{
   const d=JSON.parse(t);
   if(!d||!Array.isArray(d.items))throw 0;
-  d.items.forEach(i=>{if(i&&i.k==='eq')i.k='card'});d.items=d.items.filter(i=>i&&typeof i.id==='number'&&['card','sticky','clip','photo','zone','eq'].includes(i.k));
+  d.items.forEach(i=>{if(i&&i.k==='eq')i.k='card';if(i&&i.pts&&!(Array.isArray(i.pts)&&i.pts.every(p=>Array.isArray(p)&&p.length===2&&isFinite(p[0])&&isFinite(p[1]))))delete i.pts});d.items=d.items.filter(i=>i&&typeof i.id==='number'&&['card','sticky','clip','photo','zone','eq'].includes(i.k));
   d.links=(d.links||[]).filter(l=>Array.isArray(l)&&l.length===2);
   d.places=(d.places||[]).filter(p=>p&&isFinite(p.cx)&&isFinite(p.cy)&&p.z>0).map(p=>({id:uid(),name:String(p.name||'Place'),cx:+p.cx,cy:+p.cy,z:Math.max(.1,Math.min(3,+p.z))}));
   return newBoard(d.name||f.name.replace(/(\.redstring)?\.json$/i,''),d);
@@ -787,7 +828,7 @@ function thumb(b){
  it.forEach(i=>{const [sw,sh,sx]=dim(i),s=[sw,sh];a=Math.min(a,sx);c=Math.min(c,i.y-10);d=Math.max(d,sx+s[0]);f=Math.max(f,i.y+s[1])});
  const p=40;a-=p;c-=p;d+=p;f+=p;
  const pos={};it.forEach(i=>{if(i.k!=='zone')pos[i.id]=[i.x+dim(i)[0]/2,i.y]});
- const zr=it.filter(i=>i.k==='zone').map(i=>{const [w,hh,x]=dim(i);return `<rect x="${x}" y="${i.y}" width="${w}" height="${hh}" rx="24" fill="${ZC[i.c||0]}" fill-opacity=".38"/>`}).join('');
+ const zr=it.filter(i=>i.k==='zone').map(i=>{const [w,hh,x]=dim(i);if(i.pts)return `<path d="${freePath(i.pts,w,hh,x,i.y)}" fill="${ZC[i.c||0]}" fill-opacity=".38"/>`;return `<rect x="${x}" y="${i.y}" width="${w}" height="${hh}" rx="24" fill="${ZC[i.c||0]}" fill-opacity=".38"/>`}).join('');
  const r=it.filter(i=>i.k!=='zone').map(i=>{const [w,hh,x]=dim(i);return `<g transform="rotate(${rot(i)} ${x+w/2} ${i.y})"><rect x="${x}" y="${i.y}" width="${w}" height="${hh}" fill="${FILL[i.k]||'#fff'}"/>`+(i.k==='photo'?`<rect x="${x+12}" y="${i.y+12}" width="${w-24}" height="${i.IH||140}" fill="#2b2b2b"/>`:'')+'</g>'}).join('');
  const l=(b.links||[]).map(k=>{const u=pos[k[0]],v=pos[k[1]];return u&&v?`<path d="M${u[0]},${u[1]} Q${(u[0]+v[0])/2},${(u[1]+v[1])/2+40} ${v[0]},${v[1]}"/>`:''}).join('');
  const pins=Object.values(pos).map(u=>`<circle cx="${u[0]}" cy="${u[1]}" r="10"/>`).join('');
