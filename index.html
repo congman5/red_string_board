@@ -278,7 +278,8 @@ function setSt(t,bad){st.textContent=t;st.classList.toggle('bad',!!bad)}
 function queue(edit){
  if(loading||!cur)return;
  if(edit){edited=true;setSt('Saving…')}
- clearTimeout(saveT);saveT=setTimeout(flush,450);
+ else if(saveT)return;
+ clearTimeout(saveT);saveT=setTimeout(flush,edit?350:600);
 }
 function flush(){
  clearTimeout(saveT);saveT=null;if(!cur)return Promise.resolve();
