@@ -31,6 +31,8 @@ header>*{flex-shrink:0}header button,header .btn,h1{white-space:nowrap}
  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.16' numOctaves='2' seed='21' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .38 0 0 0 0 .2 0 0 0 0 .07 0 0 0 -5 2.95'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23n%29'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='360'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.21' numOctaves='2' seed='33' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .72 0 0 0 0 .47 0 0 0 0 .24 0 0 0 3 -1.75'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23n%29'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.6' numOctaves='1' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .22 0 0 0 0 .12 0 0 0 0 .04 0 0 0 -3 1.75'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23n%29'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .30 0 0 0 0 .16 0 0 0 0 .06 0 0 0 -3.4 2.05'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23n%29'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.6' numOctaves='2' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .7 0 0 0 0 .46 0 0 0 0 .24 0 0 0 2.6 -1.5'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23n%29'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='640'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.006 .009' numOctaves='3' seed='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .42 0 0 0 0 .24 0 0 0 0 .1 0 0 0 2.2 -.85'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23n%29'/%3E%3C/svg%3E");
  background-size:400px 400px,360px 360px,180px 180px,240px 240px,300px 300px,640px 640px}
 #wrap.pan{cursor:grabbing}
+#wrap.drawing,#wrap.drawing .it,#wrap.drawing .t{cursor:crosshair!important}
+#marq.draw{border:3px solid #ffd60a;background:rgba(255,214,10,.25);border-radius:18px}
 #dropmsg{position:absolute;inset:0;z-index:10;display:none;place-items:center;pointer-events:none;background:rgba(195,18,27,.18);outline:4px dashed var(--red);outline-offset:-22px;font:400 clamp(26px,5vw,44px) "Permanent Marker",cursive;color:#fff;text-shadow:0 3px 8px rgba(0,0,0,.6)}
 #wrap.drop #dropmsg{display:grid}
 #toast{position:absolute;left:50%;bottom:90px;transform:translateX(-50%);z-index:11;background:#1d140e;color:var(--paper);padding:12px 16px;border-radius:8px;max-width:min(420px,90%);opacity:0;pointer-events:none;transition:opacity .2s}
@@ -194,7 +196,7 @@ h1 button:focus-visible{outline:3px solid #ffd27a}
  <button id="aCard" title="Tip: write $…$ or $$…$$ in any text for math">+ Card</button>
  <button id="aSticky">+ Sticky</button>
  <button id="aClip">+ Clipping</button>
- <button id="aZone">+ Region</button>
+ <button id="aZone" aria-pressed="false" title="Draw a region: drag on the board">+ Region</button>
  <label class="btn">+ Photo<input id="aPhoto" type="file" accept="image/*" hidden></label>
 </header>
 <div id="wrap"><div id="board"><svg id="yarn"></svg></div>
@@ -313,7 +315,7 @@ function inner(i){
  return `<div class="t" data-f="t" contenteditable>${fmt(i.t)}</div>`;
 }
 const rot=i=>i.r!=null?i.r:((i.id*37)%9-4)*.8;
-let sel=new Set(),selMode=false;
+let sel=new Set(),selMode=false,drawMode=false;
 function paintSel(){board.querySelectorAll('.it').forEach(el=>el.classList.toggle('sel',sel.has(+el.dataset.id)));const n=sel.size;const sb=document.getElementById('selbar');if(sb){sb.classList.toggle('on',n>1||(n>0&&selMode));document.getElementById('selN').textContent=n+' selected'}}
 function clearSel(){if(sel.size){sel.clear();paintSel()}}
 const ZC=['#ffd60a','#ff4d4d','#3d9bff','#3cc45a','#ff6bd6','#a970ff'];
@@ -386,6 +388,7 @@ wrap.addEventListener('pointerdown',e=>{
   const [p,q]=[...pts.values()],r=wrap.getBoundingClientRect();
   pinch={d:Math.hypot(p.x-q.x,p.y-q.y),z:V.z,mx:(p.x+q.x)/2-r.left,my:(p.y+q.y)/2-r.top,vx:V.x,vy:V.y};return;
  }
+ if(drawMode&&!T.closest('#selbar')){e.preventDefault();if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();const r=wrap.getBoundingClientRect();marq={x0:e.clientX-r.left,y0:e.clientY-r.top,draw:true,moved:false};$('marq').classList.add('draw');return}
  const mk=T.closest('.mark');
  if(mk){e.preventDefault();clearPick();const P=places(),p=P.find(q=>q.id===mk.dataset.pid);if(!p)return;
   if(T.closest('.mk-x')){P.splice(P.indexOf(p),1);drawMarks();save();return}
@@ -497,7 +500,17 @@ const up=e=>{
  if(pan){if(!pan.moved)clearSel();pan=null;wrap.classList.remove('pan')}
  if(ro){ro.it.classList.remove('turning');ro=null;save();return}
  if(marq){
-  const mq=marq;marq=null;$('marq').style.display='none';
+  const mq=marq;marq=null;$('marq').style.display='none';$('marq').classList.remove('draw');
+  if(mq.draw){
+   const r=wrap.getBoundingClientRect();setDraw(false);snap();
+   const zc=S.items.filter(i=>i.k==='zone').length%6;
+   let z;
+   if(mq.moved&&mq.box.w>12&&mq.box.h>12){const a=toWorld(r.left+mq.box.l,r.top+mq.box.t);z={x:Math.round(a.x),y:Math.round(a.y),W:Math.max(140,Math.round(mq.box.w/V.z)),H:Math.max(90,Math.round(mq.box.h/V.z))}}
+   else{const a=toWorld(r.left+mq.x0,r.top+mq.y0);z={x:Math.round(a.x-210),y:Math.round(a.y-150),W:420,H:300}}
+   const id=nid();S.items.push({id,k:'zone',t:'Suspects',c:zc,...z});render();
+   const t=board.querySelector(`.it[data-id="${id}"] .t`);if(t){t.focus();const s=getSelection(),g=document.createRange();g.selectNodeContents(t);s.removeAllRanges();s.addRange(g)}
+   return;
+  }
   if(!mq.moved){if(!mq.add)clearSel();return}
   const r=wrap.getBoundingClientRect(),b=mq.box,L=r.left+b.l,Tp=r.top+b.t,R=L+b.w,B=Tp+b.h;
   if(!mq.add)sel.clear();
@@ -580,7 +593,9 @@ function add(k,extra){
 document.getElementById('aCard').onclick=()=>add('card');
 document.getElementById('aSticky').onclick=()=>add('sticky');
 document.getElementById('aClip').onclick=()=>add('clip');
-document.getElementById('aZone').onclick=()=>add('zone');
+const aZ=document.getElementById('aZone');
+function setDraw(on){drawMode=on;aZ.classList.toggle('on',on);aZ.setAttribute('aria-pressed',String(on));wrap.classList.toggle('drawing',on);if(on){clearPick();flash('Drag on the board to draw a region · Esc to cancel')}}
+aZ.onclick=()=>setDraw(!drawMode);
 function shrink(f,cb){
  const img=new Image(),r=new FileReader();
  r.onload=()=>{img.onload=()=>{
@@ -771,7 +786,7 @@ window.addEventListener('keydown',e=>{
  if(!$('lib').hidden||$('dlg').style.display==='grid')return;
  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='a'){e.preventDefault();S.items.forEach(i=>sel.add(i.id));paintSel();return}
  if((e.key==='Delete'||e.key==='Backspace')&&sel.size){e.preventDefault();delSel();return}
- if(e.key==='Escape'){clearSel();if(selMode)setSelMode(false)}
+ if(e.key==='Escape'){clearSel();if(selMode)setSelMode(false);if(drawMode)setDraw(false)}
 });
 
 /* ---- saved places ---- */
