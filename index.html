@@ -137,6 +137,37 @@ svg#yarn path.tmp{stroke-dasharray:6 5;pointer-events:none}
 .hin kbd{font:600 12px system-ui,sans-serif;background:#fff;border:1px solid #c9b89a;border-bottom-width:2px;border-radius:4px;padding:1px 6px}
 .hin code{font-size:13px;background:#efe6d2;padding:1px 4px;border-radius:3px}
 @media(max-width:520px){.hin dl{grid-template-columns:1fr;gap:2px}.hin dd{margin-bottom:8px}.hin dt{white-space:normal}}
+.tz .nb svg{width:15px;height:15px;display:block;margin:0 auto}
+.clipicon{position:absolute;right:14px;top:-22px;width:18px;height:40px;min-height:0;padding:0;border:0;background:none;color:#8d969c;z-index:6;cursor:pointer;filter:drop-shadow(1px 2px 1px rgba(0,0,0,.45));transform:rotate(8deg)}
+.clipicon svg{width:18px;height:40px;overflow:visible}
+.clipicon svg path{stroke:url(#clipg);stroke-width:2.6;stroke-linecap:round}
+.clipicon::before{content:"";position:absolute;inset:6px 4px;border-radius:12px;background:none}
+.clipicon:hover{transform:rotate(8deg) translateY(-2px)}
+.zone .clipicon{right:96px;top:6px}
+.it.noteopen{outline:3px solid #5aa2ff;outline-offset:5px}
+#side{position:absolute;top:0;right:0;bottom:0;width:min(420px,92vw);z-index:20;background:#f6efdc;color:#2a2117;display:flex;flex-direction:column;box-shadow:-10px 0 30px rgba(0,0,0,.45);transform:translateX(105%);transition:transform .25s ease;border-left:4px solid #6e4b2e}
+#side.open{transform:none}
+#side[hidden]{display:none}
+.shd{display:flex;align-items:flex-start;gap:10px;padding:16px 16px 10px;background:#2a1d14;color:var(--paper)}
+.shd small{font-size:12px;color:#c9ad88;display:block}
+.shd h3{margin:2px 0 0;font:400 22px/1.15 "Permanent Marker",cursive;overflow-wrap:anywhere}
+.shd .sx{margin-left:auto;min-width:40px;justify-content:center}
+.stabs{display:flex;gap:6px;padding:10px 16px 0;background:#2a1d14}
+.stabs button{border-radius:8px 8px 0 0;border-bottom:0;background:#3a291d}
+.stabs button.on{background:#f6efdc;color:#2a2117;border-color:#f6efdc}
+#sideTA{flex:1;resize:none;border:0;outline:0;padding:14px 18px 14px 44px;font:500 21px/30px "Caveat",cursive;color:#1d1a15;background:#fffbe9;background-image:linear-gradient(90deg,transparent 33px,#e8a0a0 33px 35px,transparent 35px),repeating-linear-gradient(transparent 0 29px,#bcd3ea 29px 30px);background-attachment:local}
+#sideTA:focus{box-shadow:inset 0 0 0 3px rgba(90,162,255,.35)}
+#sideV{flex:1;overflow:auto;padding:16px 20px;font:17px/1.6 Georgia,"Old Standard TT",serif}
+#sideV p{margin:0 0 12px}#sideV ul{margin:0 0 12px;padding-left:22px}
+#sideV a{color:#8a0f15}
+#sideV .emp{color:#8a7a62;font-style:italic}
+#sideV mjx-container[display="true"]{display:block;margin:.4em 0;text-align:center}
+#sideV mjx-container{max-width:100%}
+.sft{display:flex;gap:8px;flex-wrap:wrap;padding:10px 16px;background:#ece2c8;border-top:1px solid #d8c9a6}
+.sft button{background:#4a3324}
+.sft .del{margin-left:auto;background:none;color:#8a0f15;border-color:#c9a9a0}
+#wrap.sideopen #zoom{right:calc(min(420px,92vw) + 22px)}
+@media(max-width:600px){#side{top:auto;left:0;width:auto;height:64%;border-left:0;border-top:4px solid #6e4b2e;transform:translateY(105%)}#wrap.sideopen #zoom{display:none}}
 #ffMenu{position:fixed;z-index:36;background:#2a1d14;border:2px solid #6b4a33;border-radius:8px;padding:6px;min-width:200px;box-shadow:0 10px 24px rgba(0,0,0,.5);display:flex;flex-direction:column}
 #ffMenu[hidden]{display:none}
 #ffMenu button{border:0;background:none;justify-content:flex-start;width:100%;min-height:40px;font-size:18px;color:var(--paper)}
@@ -272,11 +303,11 @@ h1 button:focus-visible{outline:3px solid #ffd27a}
  <label class="btn">+ Photo<input id="aPhoto" type="file" accept="image/*" hidden></label>
  </div>
 </header>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><radialGradient id="pprt" cx=".38" cy=".3" r=".75"><stop offset="0" stop-color="#ff9a9a"/><stop offset=".55" stop-color="#d0141d"/><stop offset="1" stop-color="#6e0007"/></radialGradient><linearGradient id="pprs" x1="0" x2="1"><stop offset="0" stop-color="#6e0007"/><stop offset=".35" stop-color="#d0141d"/><stop offset=".5" stop-color="#ff9a9a"/><stop offset=".72" stop-color="#d0141d"/><stop offset="1" stop-color="#6e0007"/></linearGradient><linearGradient id="pprd" x1="0" x2="1"><stop offset="0" stop-color="#6e0007"/><stop offset=".45" stop-color="#d0141d"/><stop offset="1" stop-color="#6e0007"/></linearGradient>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="clipg" x1="0" x2="1"><stop offset="0" stop-color="#4d565c"/><stop offset=".45" stop-color="#f4f7f9"/><stop offset="1" stop-color="#5a646b"/></linearGradient><radialGradient id="pprt" cx=".38" cy=".3" r=".75"><stop offset="0" stop-color="#ff9a9a"/><stop offset=".55" stop-color="#d0141d"/><stop offset="1" stop-color="#6e0007"/></radialGradient><linearGradient id="pprs" x1="0" x2="1"><stop offset="0" stop-color="#6e0007"/><stop offset=".35" stop-color="#d0141d"/><stop offset=".5" stop-color="#ff9a9a"/><stop offset=".72" stop-color="#d0141d"/><stop offset="1" stop-color="#6e0007"/></linearGradient><linearGradient id="pprd" x1="0" x2="1"><stop offset="0" stop-color="#6e0007"/><stop offset=".45" stop-color="#d0141d"/><stop offset="1" stop-color="#6e0007"/></linearGradient>
 <symbol id="ppr" viewBox="0 0 30 36"><path d="M15.4 27.4 L18.6 32.6" stroke="#8f969c" stroke-width="1.7" stroke-linecap="round"/><path d="M15.6 27.6 L18.2 31.8" stroke="#e3e7ea" stroke-width=".6" stroke-linecap="round"/><g transform="rotate(-14 15 28)"><ellipse cx="15" cy="25.6" rx="7" ry="2.6" fill="url(#pprd)"/><path d="M10.6 12.4 C11.6 18 10.7 22 9.9 25.4 L20.1 25.4 C19.3 22 18.4 18 19.4 12.4 Z" fill="url(#pprs)"/><path d="M4.6 9 V11.8 A10.4 4.3 0 0 0 25.4 11.8 V9 Z" fill="url(#pprd)"/><ellipse cx="15" cy="9" rx="10.4" ry="4.3" fill="url(#pprt)"/><ellipse cx="11" cy="7.7" rx="4.2" ry="1.4" fill="#fff" opacity=".6"/></g></symbol><radialGradient id="ppbt" cx=".38" cy=".3" r=".75"><stop offset="0" stop-color="#a9cdff"/><stop offset=".55" stop-color="#1f6fe0"/><stop offset="1" stop-color="#0a2f70"/></radialGradient><linearGradient id="ppbs" x1="0" x2="1"><stop offset="0" stop-color="#0a2f70"/><stop offset=".35" stop-color="#1f6fe0"/><stop offset=".5" stop-color="#a9cdff"/><stop offset=".72" stop-color="#1f6fe0"/><stop offset="1" stop-color="#0a2f70"/></linearGradient><linearGradient id="ppbd" x1="0" x2="1"><stop offset="0" stop-color="#0a2f70"/><stop offset=".45" stop-color="#1f6fe0"/><stop offset="1" stop-color="#0a2f70"/></linearGradient>
 <symbol id="ppb" viewBox="0 0 30 36"><path d="M15.4 27.4 L18.6 32.6" stroke="#8f969c" stroke-width="1.7" stroke-linecap="round"/><path d="M15.6 27.6 L18.2 31.8" stroke="#e3e7ea" stroke-width=".6" stroke-linecap="round"/><g transform="rotate(-14 15 28)"><ellipse cx="15" cy="25.6" rx="7" ry="2.6" fill="url(#ppbd)"/><path d="M10.6 12.4 C11.6 18 10.7 22 9.9 25.4 L20.1 25.4 C19.3 22 18.4 18 19.4 12.4 Z" fill="url(#ppbs)"/><path d="M4.6 9 V11.8 A10.4 4.3 0 0 0 25.4 11.8 V9 Z" fill="url(#ppbd)"/><ellipse cx="15" cy="9" rx="10.4" ry="4.3" fill="url(#ppbt)"/><ellipse cx="11" cy="7.7" rx="4.2" ry="1.4" fill="#fff" opacity=".6"/></g></symbol></defs></svg>
 <div id="wrap"><div id="board"><svg id="yarn"></svg></div>
- <div id="toast" role="status"></div><div id="empty" hidden><b>A fresh board.</b><span>Add a card, sticky or clipping from the top bar, drop photos anywhere, or press <kbd>?</kbd> for shortcuts.</span></div><div id="flag"></div><div id="marq"></div><svg id="drawsvg"><path/></svg><div id="drawbar"><span>Draw region:</span><button id="dBox" class="on" aria-pressed="true">▭ Box</button><button id="dFree" aria-pressed="false">✎ Freehand</button><button id="dCancel">Cancel</button></div><div id="selbar" role="status"><span id="selN"></span><button id="selCopy" title="Copy (Ctrl/Cmd+C)">Copy</button><button id="selDup" title="Duplicate (Ctrl/Cmd+D)">Duplicate</button><button id="selPaste" title="Paste (Ctrl/Cmd+V)" hidden>Paste</button><button id="selDel">Delete</button><button id="selClr">Done</button></div><div id="dropmsg">Drop to pin it up</div>
+ <div id="toast" role="status"></div><div id="empty" hidden><b>A fresh board.</b><span>Add a card, sticky or clipping from the top bar, drop photos anywhere, or press <kbd>?</kbd> for shortcuts.</span></div><div id="flag"></div><aside id="side" hidden aria-label="Notes"><div class="shd"><div><small>Notes on</small><h3 id="sideT"></h3></div><button class="sx" id="sideX" aria-label="Close notes">×</button></div><div class="stabs"><button id="sRead">Read</button><button id="sEdit">Write</button></div><textarea id="sideTA" placeholder="Write a longer explanation…&#10;&#10;Blank lines make paragraphs. Start a line with - for bullets, wrap words in **double stars** for bold, and use $…$ for math. Links become clickable."></textarea><div id="sideV"></div><div class="sft"><button id="sideGo">Show piece</button><button class="del" id="sideDel">Remove note</button></div></aside><div id="marq"></div><svg id="drawsvg"><path/></svg><div id="drawbar"><span>Draw region:</span><button id="dBox" class="on" aria-pressed="true">▭ Box</button><button id="dFree" aria-pressed="false">✎ Freehand</button><button id="dCancel">Cancel</button></div><div id="selbar" role="status"><span id="selN"></span><button id="selCopy" title="Copy (Ctrl/Cmd+C)">Copy</button><button id="selDup" title="Duplicate (Ctrl/Cmd+D)">Duplicate</button><button id="selPaste" title="Paste (Ctrl/Cmd+V)" hidden>Paste</button><button id="selDel">Delete</button><button id="selClr">Done</button></div><div id="dropmsg">Drop to pin it up</div>
  <div id="zoom"><button id="undo" title="Undo (Ctrl/Cmd+Z)" aria-label="Undo">↶<span class="lb"> Undo</span></button><span class="zsep"></span><button id="zOut" aria-label="Zoom out">−</button><span id="zl">100%</span><button id="zIn" aria-label="Zoom in">+</button><button id="zHome" aria-label="Home">⌂<span class="lb"> Home</span></button><button id="zSel" title="Select mode: drag a box or tap pieces (or hold Shift)" aria-pressed="false">⬚<span class="lb"> Select</span></button><button id="zFit" aria-label="Fit all">Fit<span class="lb"> all</span></button><div class="menu up"><button id="arBtn" aria-haspopup="true" aria-expanded="false" title="Arrange pieces">⊞<span class="lb"> Arrange</span></button><div id="arMenu" class="pop up" hidden><div class="plh" id="arH"></div><button data-a="force">Untangle strings</button><button data-a="grid">Tidy into a grid</button><button data-a="overlap">Fix overlaps</button></div></div><span class="zsep"></span><div class="menu up"><button id="plBtn" aria-haspopup="true" aria-expanded="false" title="Drag onto the board to drop a pin · click for the list (keys 1–9)"><svg class="trayp" viewBox="0 0 30 36" aria-hidden="true"><use href="#ppb"/></svg><span class="lb"> Pins</span></button><div id="plMenu" class="pop up" hidden></div></div></div>
 </div>
 <div id="pinGhost"><span class="gsh"></span><svg viewBox="0 0 30 36"><use href="#ppb"/></svg></div>
@@ -291,7 +322,7 @@ h1 button:focus-visible{outline:3px solid #ffd27a}
 <dt><kbd>1</kbd>–<kbd>9</kbd></dt><dd>Jump to a blue pin</dd>
 <dt><kbd>Shift</kbd> + resize · rotate</dt><dd>Scale text · snap to 15°</dd>
 <dt><kbd>Alt</kbd>-drag a region</dt><dd>Move the region alone</dd>
-<dt>Double-click a polaroid</dt><dd>Choose its photo</dd>
+<dt>Paperclip on a piece</dt><dd>Open its notes</dd><dt>Double-click a polaroid</dt><dd>Choose its photo</dd>
 <dt><code>$x^2$</code> · <code>$$…$$</code></dt><dd>Math in any text</dd>
 <dt><kbd>Esc</kbd></dt><dd>Cancel · clear selection</dd></dl><button id="helpClose">Got it</button></div></div>
 <div id="dlg"><form id="dlgF"><p id="dlgT"></p><input id="dlgIn" maxlength="60" hidden><div class="row"><button type="submit" id="yes">OK</button><button type="button" id="no">Cancel</button></div></form></div>
@@ -434,7 +465,7 @@ function render(){
   if(i.ff)d.dataset.ff=i.ff;
   if(i.W)d.style.width=i.W+'px';
   if(i.H&&i.k!=='photo')d.style[Z?'height':'minHeight']=i.H+'px';
-  d.innerHTML=(Z?'':'<span class="pin"></span>')+`<button class="x" aria-label="Remove">×</button><span class="rs" title="Drag to resize (hold Shift to scale text too)"></span>${Z?'':'<span class="ro" title="Drag to rotate (hold Shift to snap)"></span>'}<span class="tz"><button data-d="-1" title="Smaller text" aria-label="Smaller text">A−</button><button data-d="1" title="Bigger text" aria-label="Bigger text">A+</button><button class="ffb" data-ff="1" title="Font" aria-label="Change font">Aa</button></span>`+inner(i);
+  d.innerHTML=(Z?'':'<span class="pin"></span>')+`<button class="x" aria-label="Remove">×</button><span class="rs" title="Drag to resize (hold Shift to scale text too)"></span>${Z?'':'<span class="ro" title="Drag to rotate (hold Shift to snap)"></span>'}<span class="tz"><button data-d="-1" title="Smaller text" aria-label="Smaller text">A−</button><button data-d="1" title="Bigger text" aria-label="Bigger text">A+</button><button class="ffb" data-ff="1" title="Font" aria-label="Change font">Aa</button><button class="nb" title="Notes" aria-label="Notes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 12.5V6.5a4 4 0 0 1 8 0v10a6 6 0 0 1-12 0V8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></span>`+(i.note&&i.note.trim()?`<button class="clipicon" title="Open notes" aria-label="Open notes"><svg viewBox="-2 -2 20 40" aria-hidden="true"><path d="M5 11 V27 a3 3 0 0 0 6 0 V6 a5 5 0 0 0 -10 0 V29 a7 7 0 0 0 14 0 V11" fill="none"/></svg></button>`:'')+inner(i);
   if(Z&&i.pts)d.insertAdjacentHTML('afterbegin',`<svg class="zsh" viewBox="0 0 1000 1000" preserveAspectRatio="none"><path d="${freePath(i.pts,1000,1000)}"/></svg>`);
   board.appendChild(d);
   if(i.k==='photo'&&i.IH)d.querySelector('.img').style.height=i.IH+'px';
@@ -442,6 +473,7 @@ function render(){
  });
  for(const id of sel)if(!S.items.some(i=>i.id===id))sel.delete(id);
  paintSel();drawYarn();save();
+ if(typeof noteId!=='undefined'&&noteId!=null){if(!S.items.some(i=>i.id===noteId))closeNote();else{const el=board.querySelector(`.it[data-id="${noteId}"]`);el&&el.classList.add('noteopen')}}
  const em=document.getElementById('empty');if(em)em.hidden=S.items.length>0;
 }
 function pinPos(id){
@@ -500,9 +532,9 @@ wrap.addEventListener('pointerdown',e=>{
  let T=e.target;cutBlock=false;
  if(T.closest&&T.closest('#yarn')){
   const u=document.elementsFromPoint(e.clientX,e.clientY).find(el=>!el.closest('#yarn'));
-  if(u&&u.closest('.it')&&(u.closest('.pin,.x,.rs,.ro,.tz,.cc')||pick!=null)){T=u;cutBlock=true}
+  if(u&&u.closest('.it')&&(u.closest('.pin,.x,.rs,.ro,.tz,.cc,.clipicon')||pick!=null)){T=u;cutBlock=true}
  }
- if(T.closest('#zoom,#selbar,#drawbar'))return;
+ if(T.closest('#zoom,#selbar,#drawbar,#side'))return;
  pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
  if(pts.size===2){
   drag=null;pan=null;wrap.classList.remove('pan');
@@ -529,6 +561,7 @@ wrap.addEventListener('pointerdown',e=>{
  }
  const tid=+it.dataset.id;
  const isZ=it.classList.contains('zone');
+ if(T.closest('.nb,.clipicon')){e.preventDefault();openNote(tid);return}
  if(T.closest('.ffb')){e.preventDefault();openFF(tid,T.closest('.ffb'));return}
  const tzb=T.closest('.tz button');
  if(tzb||T.closest('.tz')){e.preventDefault();if(tzb){const i=S.items.find(i=>i.id===tid);snap();i.fs=Math.round(Math.max(.5,Math.min(4,(i.fs||1)*(tzb.dataset.d>0?1.15:1/1.15)))*100)/100;if(Math.abs(i.fs-1)<.03)i.fs=1;it.style.setProperty('--fs',i.fs);drawYarn();save();if(!it.classList.contains('tzon')){it.classList.add('tzon');setTimeout(()=>it.addEventListener('pointerleave',()=>it.classList.remove('tzon'),{once:true}),0)}}return}
@@ -883,6 +916,7 @@ bname.addEventListener('input',()=>{if(!cur)return;cur.name=bname.value;document
 bname.addEventListener('blur',()=>{if(cur&&!bname.value.trim()){setName('');save()}});
 bname.addEventListener('keydown',e=>{if(e.key==='Enter')bname.blur()});
 async function openBoard(b){
+ if(typeof closeNote==='function')closeNote();
  sel.clear();
  if(typeof closePl==='function')closePl();
  if(cur&&saveT)await flush();
@@ -992,7 +1026,7 @@ function ago(t){const s=(Date.now()-t)/1000;if(s<60)return 'just now';if(s<3600)
 function renderLib(){
  if(lib.hidden)return;
  const term=q.value.trim().toLowerCase();
- const list=[...boards].sort((x,y)=>y.updated-x.updated).filter(b=>!term||(b.name||'').toLowerCase().includes(term)||(b.items||[]).some(i=>((i.t||'')+' '+(i.h||'')).toLowerCase().includes(term)));
+ const list=[...boards].sort((x,y)=>y.updated-x.updated).filter(b=>!term||(b.name||'').toLowerCase().includes(term)||(b.items||[]).some(i=>((i.t||'')+' '+(i.h||'')+' '+(i.note||'')).toLowerCase().includes(term)));
  const L=importMode?list.filter(b=>b!==cur):list;
  if(importMode){grid.innerHTML=L.map(b=>`<div class="tile" data-id="${b.id}"><button class="op" data-a="imp">${thumb(b)}<span class="nm">${esc(b.name)}</span><span class="mt">${(b.items||[]).length} pieces · click to import</span></button></div>`).join('')+(L.length?'':`<p class="empty">${term?'No boards match “'+esc(q.value)+'”.':'You don’t have any other boards yet. You can import a saved board file with “Import from computer”.'}</p>`);return}
  grid.innerHTML=(term?'':'<div class="tile new"><button class="op" data-a="new"><span><b>+</b>New board</span></button></div>')+
@@ -1030,6 +1064,45 @@ window.addEventListener('hashchange',()=>{const m=location.hash.match(/^#b-(\w+)
 window.addEventListener('pagehide',()=>{if(saveT)flush()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&saveT)flush()});
 
+/* ---- notes sidebar ---- */
+const side=$('side'),sTA=$('sideTA'),sV=$('sideV');let noteId=null,noteMode='read',noteSnap=false;
+const titleOf=i=>((i.h||i.t||'').split('\n')[0].replace(/\$+/g,'').trim().slice(0,80))||({card:'Index card',sticky:'Sticky note',clip:'Clipping',photo:'Photo',zone:'Region'}[i.k]||'Piece');
+function noteHTML(s){
+ s=(s||'').trim();if(!s)return '<p class="emp">No notes yet. Switch to Write to add an explanation.</p>';
+ const inline=t=>fmt(t).split(/(<mjx-container[\s\S]*?<\/mjx-container>|<[^>]+>)/).map(seg=>seg.startsWith('<')?seg:seg.replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>').replace(/(https?:\/\/[^\s<]+[^\s<.,;:!?)\]])/g,'<a href="$1" target="_blank" rel="noopener">$1</a>')).join('');
+ return s.split(/\n\s*\n/).map(par=>{const L=par.split('\n');
+  if(L.every(l=>/^\s*[-*•]\s+/.test(l)))return '<ul>'+L.map(l=>'<li>'+inline(l.replace(/^\s*[-*•]\s+/,''))+'</li>').join('')+'</ul>';
+  return '<p>'+L.map(inline).join('<br>')+'</p>'}).join('');
+}
+function setNoteMode(m){noteMode=m;$('sRead').classList.toggle('on',m==='read');$('sEdit').classList.toggle('on',m==='edit');sTA.hidden=m!=='edit';sV.hidden=m!=='read';const i=S.items.find(x=>x.id===noteId);if(m==='read')sV.innerHTML=noteHTML(i&&i.note);else setTimeout(()=>sTA.focus(),30)}
+function openNote(id){
+ const i=S.items.find(x=>x.id===id);if(!i)return;
+ board.querySelectorAll('.noteopen').forEach(n=>n.classList.remove('noteopen'));
+ noteId=id;noteSnap=false;$('sideT').textContent=titleOf(i);sTA.value=i.note||'';
+ const el=board.querySelector(`.it[data-id="${id}"]`);el&&el.classList.add('noteopen');
+ side.hidden=false;requestAnimationFrame(()=>side.classList.add('open'));wrap.classList.add('sideopen');
+ setNoteMode(i.note&&i.note.trim()?'read':'edit');
+}
+function closeNote(){
+ if(noteId==null)return;side.classList.remove('open');wrap.classList.remove('sideopen');
+ board.querySelectorAll('.noteopen').forEach(n=>n.classList.remove('noteopen'));noteId=null;
+ setTimeout(()=>{if(noteId==null)side.hidden=true},260);
+}
+sTA.addEventListener('input',()=>{
+ const i=S.items.find(x=>x.id===noteId);if(!i)return;
+ if(!noteSnap){snap();noteSnap=true}
+ const had=!!(i.note&&i.note.trim());
+ if(sTA.value.trim())i.note=sTA.value;else delete i.note;
+ const has=!!(i.note&&i.note.trim());
+ if(had!==has){render();const el=board.querySelector(`.it[data-id="${noteId}"]`);el&&el.classList.add('noteopen')}else save();
+});
+$('sRead').onclick=()=>setNoteMode('read');$('sEdit').onclick=()=>setNoteMode('edit');
+$('sideX').onclick=closeNote;
+$('sideDel').onclick=()=>{const i=S.items.find(x=>x.id===noteId);if(!i||!i.note){closeNote();return}ask('Remove the note on “'+titleOf(i)+'”?','Remove',()=>{snap();delete i.note;render();closeNote();flash('Note removed')})};
+$('sideGo').onclick=()=>{const el=board.querySelector(`.it[data-id="${noteId}"]`);if(!el)return;const W=wrap.clientWidth-(innerWidth>600?side.offsetWidth:0),H=wrap.clientHeight-(innerWidth>600?0:side.offsetHeight);const cx=el.offsetLeft+el.offsetWidth/2,cy=el.offsetTop+el.offsetHeight/2,z=Math.max(V.z,.8);V={z,x:W/2-cx*z,y:H/2-cy*z};applyView()};
+side.addEventListener('wheel',e=>e.stopPropagation());
+side.addEventListener('keydown',e=>{if(e.key==='Escape'){e.stopPropagation();closeNote()}});
+window.addEventListener('keydown',e=>{if(e.key==='Escape'&&noteId!=null&&!editing(e.target))closeNote()});
 /* ---- shortcuts ---- */
 function openHelp(){$('help').hidden=false;setTimeout(()=>$('helpClose').focus(),0)}
 $('helpClose').onclick=()=>{$('help').hidden=true};
