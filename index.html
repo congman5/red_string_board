@@ -277,7 +277,7 @@ h1 button:focus-visible{outline:3px solid #ffd27a}
 <symbol id="ppb" viewBox="0 0 30 36"><path d="M15.4 27.4 L18.6 32.6" stroke="#8f969c" stroke-width="1.7" stroke-linecap="round"/><path d="M15.6 27.6 L18.2 31.8" stroke="#e3e7ea" stroke-width=".6" stroke-linecap="round"/><g transform="rotate(-14 15 28)"><ellipse cx="15" cy="25.6" rx="7" ry="2.6" fill="url(#ppbd)"/><path d="M10.6 12.4 C11.6 18 10.7 22 9.9 25.4 L20.1 25.4 C19.3 22 18.4 18 19.4 12.4 Z" fill="url(#ppbs)"/><path d="M4.6 9 V11.8 A10.4 4.3 0 0 0 25.4 11.8 V9 Z" fill="url(#ppbd)"/><ellipse cx="15" cy="9" rx="10.4" ry="4.3" fill="url(#ppbt)"/><ellipse cx="11" cy="7.7" rx="4.2" ry="1.4" fill="#fff" opacity=".6"/></g></symbol></defs></svg>
 <div id="wrap"><div id="board"><svg id="yarn"></svg></div>
  <div id="toast" role="status"></div><div id="empty" hidden><b>A fresh board.</b><span>Add a card, sticky or clipping from the top bar, drop photos anywhere, or press <kbd>?</kbd> for shortcuts.</span></div><div id="flag"></div><div id="marq"></div><svg id="drawsvg"><path/></svg><div id="drawbar"><span>Draw region:</span><button id="dBox" class="on" aria-pressed="true">▭ Box</button><button id="dFree" aria-pressed="false">✎ Freehand</button><button id="dCancel">Cancel</button></div><div id="selbar" role="status"><span id="selN"></span><button id="selCopy" title="Copy (Ctrl/Cmd+C)">Copy</button><button id="selDup" title="Duplicate (Ctrl/Cmd+D)">Duplicate</button><button id="selPaste" title="Paste (Ctrl/Cmd+V)" hidden>Paste</button><button id="selDel">Delete</button><button id="selClr">Done</button></div><div id="dropmsg">Drop to pin it up</div>
- <div id="zoom"><button id="undo" title="Undo (Ctrl/Cmd+Z)" aria-label="Undo">↶<span class="lb"> Undo</span></button><span class="zsep"></span><button id="zOut" aria-label="Zoom out">−</button><span id="zl">100%</span><button id="zIn" aria-label="Zoom in">+</button><button id="zHome" aria-label="Home">⌂<span class="lb"> Home</span></button><button id="zSel" title="Select mode: drag a box or tap pieces (or hold Shift)" aria-pressed="false">⬚<span class="lb"> Select</span></button><button id="zFit" aria-label="Fit all">Fit<span class="lb"> all</span></button><span class="zsep"></span><div class="menu up"><button id="plBtn" aria-haspopup="true" aria-expanded="false" title="Drag onto the board to drop a pin · click for the list (keys 1–9)"><svg class="trayp" viewBox="0 0 30 36" aria-hidden="true"><use href="#ppb"/></svg><span class="lb"> Pins</span></button><div id="plMenu" class="pop up" hidden></div></div></div>
+ <div id="zoom"><button id="undo" title="Undo (Ctrl/Cmd+Z)" aria-label="Undo">↶<span class="lb"> Undo</span></button><span class="zsep"></span><button id="zOut" aria-label="Zoom out">−</button><span id="zl">100%</span><button id="zIn" aria-label="Zoom in">+</button><button id="zHome" aria-label="Home">⌂<span class="lb"> Home</span></button><button id="zSel" title="Select mode: drag a box or tap pieces (or hold Shift)" aria-pressed="false">⬚<span class="lb"> Select</span></button><button id="zFit" aria-label="Fit all">Fit<span class="lb"> all</span></button><div class="menu up"><button id="arBtn" aria-haspopup="true" aria-expanded="false" title="Arrange pieces">⊞<span class="lb"> Arrange</span></button><div id="arMenu" class="pop up" hidden><div class="plh" id="arH"></div><button data-a="force">Untangle strings</button><button data-a="grid">Tidy into a grid</button><button data-a="overlap">Fix overlaps</button></div></div><span class="zsep"></span><div class="menu up"><button id="plBtn" aria-haspopup="true" aria-expanded="false" title="Drag onto the board to drop a pin · click for the list (keys 1–9)"><svg class="trayp" viewBox="0 0 30 36" aria-hidden="true"><use href="#ppb"/></svg><span class="lb"> Pins</span></button><div id="plMenu" class="pop up" hidden></div></div></div>
 </div>
 <div id="pinGhost"><span class="gsh"></span><svg viewBox="0 0 30 36"><use href="#ppb"/></svg></div>
 <div id="ffMenu" hidden role="menu"></div>
@@ -1082,6 +1082,73 @@ window.addEventListener('keydown',e=>{
  if((e.key==='Delete'||e.key==='Backspace')&&sel.size){e.preventDefault();delSel();return}
  if(e.key==='Escape'){clearSel();if(selMode)setSelMode(false);if(drawMode)setDraw(false)}
 });
+
+/* ---- arrange ---- */
+const arBtn=$('arBtn'),arMenu=$('arMenu');
+function closeAr(){arMenu.hidden=true;arBtn.setAttribute('aria-expanded','false')}
+function arTargets(){
+ const ids=sel.size?[...sel]:S.items.map(i=>i.id);
+ return ids.map(id=>{const i=S.items.find(x=>x.id===id),el=board.querySelector(`.it[data-id="${id}"]`);return i&&el&&i.k!=='zone'?{i,el,w:el.offsetWidth,h:el.offsetHeight,x:i.x+el.offsetWidth/2,y:i.y+el.offsetHeight/2}:null}).filter(Boolean);
+}
+arBtn.onclick=e=>{e.stopPropagation();closeMenu();closePl();if(arMenu.hidden){const n=arTargets().length;$('arH').textContent=sel.size?'Arrange '+n+' selected piece'+(n===1?'':'s'):'Arrange the whole board';arMenu.hidden=false;arBtn.setAttribute('aria-expanded','true')}else closeAr()};
+document.addEventListener('pointerdown',e=>{if(!e.target.closest('#arMenu,#arBtn'))closeAr()});
+function separate(N,pad,iters){
+ for(let it=0;it<iters;it++){let moved=false;
+  for(let a=0;a<N.length;a++)for(let b=a+1;b<N.length;b++){const A=N[a],B=N[b];
+   const ox=(A.w+B.w)/2+pad-Math.abs(A.x-B.x),oy=(A.h+B.h)/2+pad-Math.abs(A.y-B.y);
+   if(ox>0&&oy>0){moved=true;if(ox<oy){const s=(A.x<B.x?-1:1)*ox/2;A.x+=s;B.x-=s}else{const s=(A.y<B.y?-1:1)*oy/2;A.y+=s;B.y-=s}}}
+  if(!moved)break}
+}
+function layForce(N){
+ const idx=new Map(N.map((n,k)=>[n.i.id,k]));
+ const E=S.links.filter(l=>idx.has(l[0])&&idx.has(l[1])).map(l=>[idx.get(l[0]),idx.get(l[1])]);
+ const deg=N.map(()=>0);E.forEach(([a,b])=>{deg[a]++;deg[b]++});
+ const cx=N.reduce((s,n)=>s+n.x,0)/N.length,cy=N.reduce((s,n)=>s+n.y,0)/N.length;
+ const size=n=>Math.max(n.w,n.h);
+ let T=Math.max(200,Math.sqrt(N.length)*120);
+ for(let it=0;it<320;it++){
+  const F=N.map(()=>[0,0]);
+  for(let a=0;a<N.length;a++)for(let b=a+1;b<N.length;b++){
+   let dx=N[a].x-N[b].x,dy=N[a].y-N[b].y,d=Math.hypot(dx,dy)||.1;
+   const k=(size(N[a])+size(N[b]))/2+50,f=d<k*2.2?k*k/d:k*k/d/12;
+   F[a][0]+=dx/d*f;F[a][1]+=dy/d*f;F[b][0]-=dx/d*f;F[b][1]-=dy/d*f}
+  E.forEach(([a,b])=>{let dx=N[b].x-N[a].x,dy=N[b].y-N[a].y,d=Math.hypot(dx,dy)||.1;
+   const L=(size(N[a])+size(N[b]))/2+70,f=(d-L)*.7;
+   F[a][0]+=dx/d*f;F[a][1]+=dy/d*f;F[b][0]-=dx/d*f;F[b][1]-=dy/d*f});
+  N.forEach((n,k)=>{const g=deg[k]?.035:.09;F[k][0]+=(cx-n.x)*g;F[k][1]+=(cy-n.y)*g*1.6;
+   const m=Math.hypot(F[k][0],F[k][1])||1,s=Math.min(m,T);n.x+=F[k][0]/m*s;n.y+=F[k][1]/m*s});
+  T*=.985;
+ }
+ separate(N,28,200);
+}
+function layGrid(N){
+ const b0={x:Math.min(...N.map(n=>n.x-n.w/2)),y:Math.min(...N.map(n=>n.y-n.h/2))};
+ const band=Math.max(80,N.reduce((s,n)=>s+n.h,0)/N.length*.6);
+ N.sort((p,q)=>Math.round(p.y/band)-Math.round(q.y/band)||p.x-q.x);
+ const cols=Math.max(1,Math.round(Math.sqrt(N.length*1.6))),gap=46;
+ const cw=[],rh=[];N.forEach((n,k)=>{const c=k%cols,r=Math.floor(k/cols);cw[c]=Math.max(cw[c]||0,n.w);rh[r]=Math.max(rh[r]||0,n.h)});
+ const cx=[b0.x],ry=[b0.y];cw.forEach((w,c)=>cx[c+1]=cx[c]+w+gap);rh.forEach((h,r)=>ry[r+1]=ry[r]+h+gap+20);
+ N.forEach((n,k)=>{const c=k%cols,r=Math.floor(k/cols);n.x=cx[c]+cw[c]/2;n.y=ry[r]+n.h/2+20})
+}
+let arRaf=0;
+function arrange(kind){
+ closeAr();const N=arTargets();
+ if(N.length<2){flash(sel.size?'Select at least two pieces to arrange.':'Add a few pieces first.');return}
+ snap();const from=N.map(n=>({x:n.i.x,y:n.i.y}));
+ if(kind==='force')layForce(N);else if(kind==='grid')layGrid(N);else separate(N,24,300);
+ const to=N.map(n=>({x:Math.round(n.x-n.w/2),y:Math.round(n.y-n.h/2)}));
+ const moved=to.some((t,k)=>Math.abs(t.x-from[k].x)+Math.abs(t.y-from[k].y)>1);
+ if(!moved){hist.pop();flash(kind==='overlap'?'Nothing is overlapping.':'Already arranged.');return}
+ cancelAnimationFrame(arRaf);
+ const done=()=>{N.forEach((n,k)=>{n.i.x=to[k].x;n.i.y=to[k].y;n.el.style.left=n.i.x+'px';n.el.style.top=n.i.y+'px'});drawYarn();save();if(!sel.size)fit();flash(kind==='force'?'Untangled':kind==='grid'?'Tidied into a grid':'Overlaps fixed')};
+ if(matchMedia('(prefers-reduced-motion: reduce)').matches)return done();
+ const t0=performance.now(),D=550;
+ const step=t=>{let k=Math.min(1,(t-t0)/D);k=1-Math.pow(1-k,3);
+  N.forEach((n,j)=>{n.i.x=Math.round(from[j].x+(to[j].x-from[j].x)*k);n.i.y=Math.round(from[j].y+(to[j].y-from[j].y)*k);n.el.style.left=n.i.x+'px';n.el.style.top=n.i.y+'px'});
+  drawYarn();if(k<1)arRaf=requestAnimationFrame(step);else done()};
+ arRaf=requestAnimationFrame(step);
+}
+arMenu.onclick=e=>{const b=e.target.closest('button');if(b)arrange(b.dataset.a)};
 
 /* ---- saved places ---- */
 const plBtn=$('plBtn'),plMenu=$('plMenu');
